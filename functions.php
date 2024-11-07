@@ -21,11 +21,40 @@ function guest_data_application_theme_scripts() {
   // Enqueue theme style.css
   wp_enqueue_style('guest-data-application-theme-style', get_stylesheet_uri());
 
-  // Enqueue Bootstrap 5 CSS
-  wp_enqueue_style('bootstrap-css', 'https://stackpath.bootstrapcdn.com/bootstrap/5.0.0/css/bootstrap.min.css', array(), '5.0.0');
+  wp_enqueue_style('bootstrap5', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css', array(), '5.2.2', 'all');
 
-  // Optionally, enqueue Bootstrap 5 JS (if needed)
-  wp_enqueue_script('bootstrap-js', 'https://stackpath.bootstrapcdn.com/bootstrap/5.0.0/js/bootstrap.bundle.min.js', array('jquery'), '5.0.0', true);
+  wp_enqueue_script('hero-template-jquery', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js', array(), '', true);
+
+  wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', array('jquery'), '5.2.1', true);
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
-?>
+
+function register_custom_templates( $templates ) {
+  $directory = get_template_directory() . '/questionnaire-templates/';
+
+  // Ensure the directory exists
+  if ( $handler = opendir( $directory ) ) {
+    while ( false !== ( $file = readdir( $handler ) ) ) {
+      if ( strpos( $file, '.php' ) !== false ) {
+        $templates[$file] = $file;
+      }
+    }
+    closedir( $handler );
+  }
+
+  return $templates;
+}
+add_filter( 'theme_page_templates', 'register_custom_templates' );
+
+function load_custom_template( $template ) {
+  global $post;
+
+  if ( isset( $post->page_template ) && $post->page_template ) {
+    $custom_template = locate_template( 'questionnaire-templates/' . $post->page_template );
+    if ( $custom_template ) {
+      return $custom_template;
+    }
+  }
+  return $template;
+}
+add_filter( 'template_include', 'load_custom_template', 99 );

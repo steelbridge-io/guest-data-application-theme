@@ -1,0 +1,307 @@
+<?php
+/**
+ * Template Name: Travel Form Posts v2
+ * Template Post Type: travel-form
+ * Developed for The Fly Shop
+ *
+ * @package The_Fly_Shop
+ * Author: Chris Parsons
+ * Author URL: https://steelbridge.io
+ */
+
+get_header();
+
+// Display post title and content.
+echo '<div id="travel-form-posts" class="container-fluid">';
+echo '<div class="container"><h1>' . get_the_title() . '</h1></div>';
+
+if (have_posts()) :
+  while (have_posts()) : the_post();
+    echo '<div class="post-content container">';
+    the_content();
+    echo '</div>';
+  endwhile;
+else :
+  echo '<p>' . __('Sorry, no posts matched your criteria.') . '</p>';
+endif;
+
+// Search and filter section.
+echo '<div class="container gda-search-wrapper">
+        <div class="row display-flex align-items-center">
+            <div class="col-md-4">
+                <input type="text" id="searchInput" placeholder="Search table..">
+            </div>
+            <div class="col-md-4">
+                <div class="search-buttons">
+                    <button id="prevMatch">Previous</button>
+                    <button id="nextMatch">Next</button>
+                    <span id="matchInfo"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    Filter Table
+                </button>
+            </div>
+        </div>
+      </div>';
+
+echo '<div class="collapse" id="collapseExample">
+        <div id="filter-cont" class="container filter-wrap">
+            <form method="GET">
+                <div class="row">';
+
+// Filter for arrival date.
+$arrival_date = filter_input(INPUT_GET, 'filter_arrival_date', FILTER_SANITIZE_SPECIAL_CHARS);
+echo '<div class="well col-md-4">
+        <label for="filter_arrival_date">Arrival Date:</label>
+        <input type="date" id="filter_arrival_date" name="filter_arrival_date" value="' . (isset($arrival_date) ? $arrival_date : '') . '">
+      </div>';
+
+echo '      </div>
+              <input class="filter-btn" type="submit" value="Filter">
+              <a href="' . strtok((isset($_SERVER['HTTPS']) ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], '?') . '" class="btn btn-danger clear-results" title="Clear results">Clear Results</a>
+            </form>
+        </div>
+      </div>'; // Close collapse container
+
+// Retrieve form ID based on the guest number.
+$guest_number = get_post_meta(get_the_ID(), '_gda_meta_key', true);
+if ($guest_number) {
+  $form_id = $guest_number;
+}
+
+$search_criteria = [
+  'status' => 'active'
+];
+
+/* Filter logic */
+if (isset($_GET['filter_arrival_date']) && $_GET['filter_arrival_date'] != '') {
+  try {
+    $date = new DateTime($_GET['filter_arrival_date']);
+    $arrival_date_formatted = $date->format('Y-m-d');
+    $search_criteria['field_filters'][] = ['key' => '46', 'value' => $arrival_date_formatted]; // check arrival date
+  } catch (Exception $e) {
+    error_log('Invalid arrival date: ' . $_GET['filter_arrival_date']);
+  }
+}
+
+if ($form_id) {
+  $form = GFAPI::get_form($form_id);
+
+  if ($form) {
+    // Retrieve form fields dynamically
+    $fields = $form['fields'];
+
+    echo '<div class="container form-list-wrap"></div>';
+
+    echo '<div id="question-grid" class="table-wrapper">
+            <div class="table-scrollable">
+            <table id="gda-table">
+            <thead>
+            <tr>';
+
+    $name_field = null;
+    $allergies_field = null;
+    $other_allergies_field = null;
+    $special_requests_field = null;
+    $reservation_number_field = null;
+    $arrival_date_field = ['label' => 'Trip Arrival Date', 'id' => 46, 'type' => 'date'];
+    $other_fields = [];
+
+    // Identify fields including specific ones
+    foreach ($fields as $field) {
+      if (in_array($field->type, ['section', 'page', 'html', 'captcha'])) {
+        continue;
+      }
+      $label = !empty($field->label) ? $field->label : 'Field ' . $field->id;
+      $field_entry = ['label' => $label, 'id' => $field->id, 'type' => $field->type];
+      if (strtolower($field->label) === 'name') {
+        $name_field = $field_entry;
+      } elseif (strtolower($field->label) === 'allergies (food and environmental)') {
+        $allergies_field = $field_entry;
+      } elseif (strtolower($field->label) === 'other allergies') {
+        $other_allergies_field = $field_entry;
+      } elseif (strtolower($field->label) === 'please list any special requests, needs, dietary restrictions, health concerns, physical challenges') {
+        $special_requests_field = $field_entry;
+      } elseif (strtolower($field->label) === 'reservation number') {
+        $reservation_number_field = $field_entry;
+      } else {
+        $other_fields[] = $field_entry;
+      }
+    }
+
+    // Render the table headers in the correct order
+    if ($name_field) {
+      echo '<th class="fixed-column">' . esc_html($name_field['label']) . '</th>';
+    }
+    if ($allergies_field) {
+      echo '<th>' . esc_html($allergies_field['label']) . '</th>';
+    }
+    if ($other_allergies_field) {
+      echo '<th>' . esc_html($other_allergies_field['label']) . '</th>';
+    }
+    if ($special_requests_field) {
+      echo '<th>' . esc_html($special_requests_field['label']) . '</th>';
+    }
+    if ($arrival_date_field) {
+      echo '<th>' . esc_html($arrival_date_field['label']) . '</th>';
+    }
+    foreach ($other_fields as $index => $field) {
+      if ($index == 2) {  // To insert at the 7th position, considering already rendered fields
+        if ($reservation_number_field) {
+          echo '<th>' . esc_html($reservation_number_field['label']) . '</th>';
+        }
+      }
+      echo '<th>' . esc_html($field['label']) . '</th>';
+    }
+
+    echo '</tr>
+            </thead>
+            <tbody>';
+
+    // Fetch entries from Gravity Forms
+    error_log('Search Criteria: ' . print_r($search_criteria, true));
+    $entries = GFAPI::get_entries($form_id, $search_criteria);
+
+    // Function to sort entries manually based on Arrival date
+    usort($entries, function($a, $b) {
+      $date_a = DateTime::createFromFormat('Y-m-d', rgar($a, '46'));
+      $date_b = DateTime::createFromFormat('Y-m-d', rgar($b, '46'));
+      if ($date_a && $date_b) {
+        return $date_a <=> $date_b;
+      }
+      return 0;
+    });
+
+    // Render table rows with entry data
+    foreach ($entries as $entry) {
+      echo '<tr>';
+
+      // Render the "Name" field first
+      if ($name_field) {
+        $field_id = $name_field['id'];
+        $first_name = rgar($entry, "{$field_id}.3");
+        $last_name = rgar($entry, "{$field_id}.6");
+        $full_name = trim("$first_name $last_name");
+        $name_value = !empty($full_name) ? esc_html($full_name) : '&nbsp;';
+        echo '<td class="fixed-column">' . $name_value . '</td>';
+      }
+
+      // Render the "Allergies" field second
+      if ($allergies_field) {
+        $field_id = $allergies_field['id'];
+        $allergies_value = rgar($entry, $field_id);
+        $allergies_value = !empty($allergies_value) ? esc_html($allergies_value) : '&nbsp;';
+        echo '<td>' . $allergies_value . '</td>';
+      }
+
+      // Render the "Other Allergies" field third
+      if ($other_allergies_field) {
+        $field_id = $other_allergies_field['id'];
+        $other_allergies_value = rgar($entry, $field_id);
+        $other_allergies_value = !empty($other_allergies_value) ? esc_html($other_allergies_value) : '&nbsp;';
+        echo '<td>' . $other_allergies_value . '</td>';
+      }
+
+      // Render the "Special Requests" field fourth with popover functionality
+      if ($special_requests_field) {
+        $field_id = $special_requests_field['id'];
+        $special_requests_value = rgar($entry, $field_id);
+        if (!empty($special_requests_value)) {
+          $excerpt = (strlen($special_requests_value) > 50) ? substr($special_requests_value, 0, 50) . '...' : $special_requests_value;
+          echo '<td>';
+          echo esc_html($excerpt);
+          if (strlen($special_requests_value) > 50) {
+            echo ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($special_requests_value) . '">Read More</a>';
+          }
+          echo '</td>';
+        } else {
+          echo '<td>&nbsp;</td>';
+        }
+      }
+
+      // Render the "Arrival Date" field
+      if ($arrival_date_field) {
+        $field_id = $arrival_date_field['id'];
+        $arrival_date_value = rgar($entry, $field_id);
+        if (DateTime::createFromFormat('Y-m-d', $arrival_date_value)) {
+          $date = new DateTime($arrival_date_value);
+          $arrival_date_value = $date->format('m/d/Y');
+        }
+        $arrival_date_value = !empty($arrival_date_value) ? esc_html($arrival_date_value) : '&nbsp;';
+        echo '<td>' . $arrival_date_value . '</td>';
+      }
+
+      // Render the rest of the fields
+      foreach ($other_fields as $index => $field) {
+        if ($index == 2) { // To insert cell value at the 7th position, considering already rendered fields
+          if ($reservation_number_field) {
+            $field_id = $reservation_number_field['id'];
+            $reservation_number_value = rgar($entry, $field_id);
+            $reservation_number_value = !empty($reservation_number_value) ? esc_html($reservation_number_value) : '&nbsp;';
+            echo '<td>' . $reservation_number_value . '</td>';
+          }
+        }
+
+        $field_id = $field['id'];
+        $cell_value = rgar($entry, $field_id);
+
+        // Handle date fields
+        if ($field['type'] === 'date') {
+          try {
+            $date = new DateTime($cell_value);
+            $cell_value = $date->format('m/d/Y');
+          } catch (Exception $e) {
+            // If the date is invalid, retain its original value
+            $cell_value = !empty($cell_value) ? esc_html($cell_value) : '&nbsp;';
+          }
+        } elseif ($field['type'] === 'multiselect') {
+          // Handle multi-select fields
+          $cell_value = !empty($cell_value) ? esc_html(implode(', ', $cell_value)) : '&nbsp;';
+        } else {
+          $cell_value = !empty($cell_value) ? esc_html($cell_value) : '&nbsp;';
+        }
+
+        // Handle textarea fields for popover
+        if ($field['type'] === 'textarea') {
+          $excerpt = (strlen($cell_value) > 50) ? substr($cell_value, 0, 50) . '...' : $cell_value;
+          echo '<td>';
+          echo esc_html($excerpt);
+          if (strlen($cell_value) > 50) {
+            echo ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($cell_value) . '">Read More</a>';
+          }
+          echo '</td>';
+        } else {
+          echo '<td>' . $cell_value . '</td>';
+        }
+      }
+
+      echo '</tr>';
+    }
+
+    echo '</tbody>'; // End tbody
+    echo '</table>'; // End table
+    echo '</div>'; // End table-scrollable
+    echo '</div>'; // End table-wrapper
+  } else {
+    echo '<p>Form with ID ' . esc_html($form_id) . ' not found.</p>';
+  }
+}
+echo '</div>'; // End travel-form-posts div
+
+get_footer();
+?>
+
+<!-- Initialize Bootstrap Popover -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl, {
+                trigger: 'focus',
+                html: true,
+            });
+        });
+    });
+</script>
