@@ -1,31 +1,8 @@
 <?php
-get_header();
-?>
-
-  <main id="main-content">
-    <?php
-    if (have_posts()) :
-      while (have_posts()) : the_post();
-        ?>
-        <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-          <h1><?php the_title(); ?></h1>
-          <div class="entry-content">
-            <?php the_content(); ?>
-          </div>
-        </article>
-        <?php
-        if (comments_open() || get_comments_number()) :
-          comments_template();
-        endif;
-      endwhile;
-    else :
-      ?>
-      <p><?php esc_html_e('No posts found.', 'guest-data-application-theme'); ?></p>
-    <?php
-    endif;
-    ?>
-  </main>
-
-<?php
-get_footer();
-?>
+get_header(); ?>
+  <div class="wrapper">
+    <div class="container single-post mt-5 mb-5">
+      <?php get_template_part('template-parts/content-single.php', 'single'); ?>
+    </div>
+    <?php get_footer(); ?>
+  </div>
