@@ -23,6 +23,16 @@ require_once __DIR__ . '/inc/guest-data-app.php';
 require_once __DIR__ . '/inc/customizer.php';
 require_once __DIR__ . '/inc/front-page.php';
 
+// Custom Travel Manager Nav
+
+function register_custom_menus() {
+  register_nav_menus(array(
+    'main-menu' => __('Main Menu'),
+    'travel-manager-menu' => __('Travel Manager Menu'),
+  ));
+}
+add_action('init', 'register_custom_menus');
+
 // Redirect after logout
 function mytheme_redirect_after_logout() {
   wp_redirect(home_url());
@@ -71,6 +81,28 @@ function remove_default_logout_link($wp_admin_bar) {
 }
 add_action('admin_bar_menu', 'remove_default_logout_link', 999);
 
+/*
+    * Adds permalink to Publish section inside the editor for post-type "travel-questionnaire"
+    * */
+
+function add_permalink_to_publish_box() {
+  global $post, $pagenow;
+
+  if ( $pagenow == 'post.php' && in_array($post->post_type, ['travel-questionnaire', 'travel-form']) ) {
+    $post_id = $post->ID;
+    $permalink = get_permalink($post_id);
+    ?>
+    <div class="misc-pub-section misc-pub-permalink">
+      <strong><?php _e('Permalink:'); ?></strong>
+      <span id="sample-permalink">
+          <a href="<?php echo esc_url($permalink); ?>" target="_blank"><?php echo esc_html($permalink); ?></a>
+      </span>
+    </div>
+    <?php
+  }
+}
+add_action('post_submitbox_misc_actions', 'add_permalink_to_publish_box');
+
 // Enqueue scripts and styles for the frontend
 function guest_data_application_theme_scripts() {
   // Enqueue theme style.css
@@ -78,10 +110,13 @@ function guest_data_application_theme_scripts() {
 
   // Enqueue Bootstrap styles and scripts
   wp_enqueue_style('bootstrap5', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css', [], '5.2.2', 'all');
+  wp_enqueue_script('hero-template-jquery', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js', array(), '', true);
   wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', ['jquery'], '5.2.1', true);
 
   // Custom script to handle logout without confirmation
   wp_enqueue_script('custom-logout-script', get_template_directory_uri() . '/js/logout.js', ['jquery'], null, true);
+  wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', ['jquery'], null, true);
+  wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', ['jquery'], null, true);
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
 
@@ -123,3 +158,13 @@ function guest_data_application_load_custom_template($template) {
   return $template;
 }
 add_filter('template_include', 'guest_data_application_load_custom_template', 99);
+
+function include_private_posts_in_search($query) {
+  // Check if it's a search query and if the user is logged in
+  if ($query->is_search && $query->is_main_query() && is_user_logged_in()) {
+    // Include private posts in the search results
+    $query->set('post_status', array('publish', 'private'));
+  }
+  return $query;
+}
+add_filter('pre_get_posts', 'include_private_posts_in_search');
