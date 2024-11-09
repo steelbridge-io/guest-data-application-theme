@@ -21,9 +21,22 @@
     </div>
     <nav id="site-navigation">
       <?php
-      wp_nav_menu(array(
-        'theme_location' => 'main-menu'
-      ));
+      if ( is_user_logged_in() ) {
+        $user = wp_get_current_user();
+        if ( in_array('travel_manager', (array) $user->roles ) ) {
+          wp_nav_menu(array(
+            'theme_location' => 'travel-manager-menu'
+          ));
+        } else {
+          wp_nav_menu(array(
+            'theme_location' => 'main-menu'
+          ));
+        }
+      } else {
+        wp_nav_menu(array(
+          'theme_location' => 'main-menu'
+        ));
+      }
       ?>
     </nav>
   </div>
