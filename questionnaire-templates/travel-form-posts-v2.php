@@ -33,8 +33,8 @@ echo '<div class="container gda-search-wrapper">
             </div>
             <div class="col-md-4">
                 <div class="search-buttons">
-                    <button id="prevMatch">Previous</button>
-                    <button id="nextMatch">Next</button>
+                    <button class="btn btn-danger" id="prevMatch">Previous</button>
+                    <button class="btn btn-danger" id="nextMatch">Next</button>
                     <span id="matchInfo"></span>
                 </div>
             </div>
@@ -50,20 +50,19 @@ echo '<div class="collapse" id="collapseExample">
         <div id="filter-cont" class="container filter-wrap">
             <form method="GET">
                 <div class="row">';
-
-// Filter for arrival date.
-$arrival_date = filter_input(INPUT_GET, 'filter_arrival_date', FILTER_SANITIZE_SPECIAL_CHARS);
-echo '<div class="well col-md-4">
+                // Filter for arrival date.
+                $arrival_date = filter_input(INPUT_GET, 'filter_arrival_date', FILTER_SANITIZE_SPECIAL_CHARS);
+echo '<div class="well col-12 search-filter-well">
         <label for="filter_arrival_date">Arrival Date:</label>
         <input type="date" id="filter_arrival_date" name="filter_arrival_date" value="' . esc_attr($arrival_date) . '">
+        <input class="filter-btn btn btn-danger" type="submit" value="Filter">
+            <a href="' . esc_url(strtok((isset($_SERVER['HTTPS']) ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], '?')) . '" class="btn btn-danger clear-results" title="Clear results">Clear Results</a>
       </div>';
 
-echo '      </div>
-              <input class="filter-btn" type="submit" value="Filter">
-              <a href="' . esc_url(strtok((isset($_SERVER['HTTPS']) ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], '?')) . '" class="btn btn-danger clear-results" title="Clear results">Clear Results</a>
-            </form>
-        </div>
-      </div>'; // Close collapse container
+  echo '      </div>
+          </form>
+      </div>
+    </div>'; // Close collapse container
 
 $guest_number = get_post_meta(get_the_ID(), '_gda_meta_key', true);
 if ($guest_number) {
@@ -203,30 +202,30 @@ if ($form_id) {
         $row_values[$name_field['label']] = $name_value;
       }
 
-     /* if ($allergies_field && $allergies_field['type'] === 'checkbox') {
-        $field_id = $allergies_field['id'];
-        $choices = $allergies_field['choices'];
-        $checkbox_values = [];
+      /* if ($allergies_field && $allergies_field['type'] === 'checkbox') {
+         $field_id = $allergies_field['id'];
+         $choices = $allergies_field['choices'];
+         $checkbox_values = [];
 
-        foreach ($choices as $choice) {
-          $choice_value = $choice['value'];
-          $subfield_key = "{$field_id}.{$choice_value}";
-          if (!empty(rgar($entry, $subfield_key))) {
-            $checkbox_values[] = esc_html($choice['text']);
-          }
-        }
+         foreach ($choices as $choice) {
+           $choice_value = $choice['value'];
+           $subfield_key = "{$field_id}.{$choice_value}";
+           if (!empty(rgar($entry, $subfield_key))) {
+             $checkbox_values[] = esc_html($choice['text']);
+           }
+         }
 
-        if (empty($choices)) {
-          foreach ($entry as $key => $value) {
-            if (strpos($key, "{$field_id}.") === 0 && !empty($value)) {
-              $checkbox_values[] = esc_html($value);
-            }
-          }
-        }
+         if (empty($choices)) {
+           foreach ($entry as $key => $value) {
+             if (strpos($key, "{$field_id}.") === 0 && !empty($value)) {
+               $checkbox_values[] = esc_html($value);
+             }
+           }
+         }
 
-        $allergies_value = !empty($checkbox_values) ? implode(', ', $checkbox_values) : '&nbsp;';
-        $row_values[$allergies_field['label']] = $allergies_value;
-      } */
+         $allergies_value = !empty($checkbox_values) ? implode(', ', $checkbox_values) : '&nbsp;';
+         $row_values[$allergies_field['label']] = $allergies_value;
+       } */
       if ($allergies_field && $allergies_field['type'] === 'checkbox') {
         $field_id = $allergies_field['id'];
         $checkbox_values = [];
@@ -282,7 +281,7 @@ if ($form_id) {
           if (strlen($special_requests_value) > 50) {
             $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($special_requests_value) . '">Read More</a>';
           }
-          $row_values[$special_requests_field['label']] = travel - form - posts - v2 . phpesc_html($excerpt) . $popover_link;
+          $row_values[$special_requests_field['label']] = esc_html($excerpt) . $popover_link;
         } else {
           $row_values[$special_requests_field['label']] = '&nbsp;';
         }
@@ -367,7 +366,7 @@ if ($form_id) {
             if (strlen($cell_value) > 50) {
               $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($cell_value) . '">Read More</a>';
             }
-            $cell_value = travel - form - posts - v2 . phpesc_html($excerpt) . $popover_link;
+            $cell_value = esc_html($excerpt) . $popover_link;
             break;
           case 'address':
             // Handle address field specifically here if needed
