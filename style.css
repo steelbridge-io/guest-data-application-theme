@@ -112,9 +112,26 @@ footer {
 }
 
 .form-container {
-    display: flex;
     justify-content: space-between;
     margin-top: 20px;
+}
+
+.form-container .row .col-md-6 {
+    margin-top: 1.618em;
+    margin-bottom: 1.618em;
+}
+
+.form-container .row .col-md-6 .card {
+    background: #eee;
+    justify-items: center;
+    height: 100%;
+    padding-top: 1.618em;
+    padding-bottom: 1.618em;
+}
+
+.card .login-form,
+.card .registration-form {
+    margin: 0 auto;
 }
 
 .login-form, .registration-form {
