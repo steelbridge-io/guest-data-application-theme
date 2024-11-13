@@ -5,23 +5,25 @@
 
 get_header(); ?>
 
+<div class="container mt-5">
+  <h1><?php echo the_title(); ?></h1>
+
 <?php
 if (have_posts()) :
   while (have_posts()) : the_post();
     if (get_the_content()) {
       ?>
-      <div class="container">
         <div class="row">
           <div class="col-12">
             <?php the_content(); ?>
           </div>
         </div>
-      </div>
       <?php
     }
   endwhile;
 endif;
 ?>
+</div>
 
   <div class="container travel-item-list mt-5 mb-5">
     <div class="row">
