@@ -178,6 +178,42 @@ function my_custom_login_styles() {
   // Path to your custom logo in the theme directory
   $custom_logo_url = get_template_directory_uri() . '/images/login-logo.png';
 
+  ?>
+  <style type="text/css">
+      body.login {
+          background-color: #333333; /* Change this to match your theme's background color */
+      }
+      a.wp-login-lost-password,
+      #backtoblog a {
+          color: #f5f5f5 !important;
+      }
+      #login h1 a {
+          background-image: url('<?php echo esc_url($custom_logo_url); ?>');
+          background-size: contain;
+          width: 300px; /* Adjust based on your logo size */
+          height: 80px; /* Adjust based on your logo size */
+      }
+      #wp-submit {
+          background-color: #B32018 !important;
+      }
+      #wp-submit:focus {
+          border-color: #B32018 !important;
+          box-shadow: none !important;
+      }
+      .login form {
+          background: #ffffff; /* Change this to match your theme's form background color */
+          border: 1px solid #ddd; /* Change this to match your theme's form border color */
+          box-shadow: 0 1px 3px rgba(0,0,0,0.13);
+      }
+      .login label {
+          color: #333333; /* Change this to match your theme's font color */
+      }
+      .wp-core-ui .button-primary {
+          background: #007cba; /* Change this to match your theme's button color */
+          border-color: #0073aa; /* Change this to match your theme's button border color */
+      }
+  </style>
+  <?php
 }
 add_action('login_enqueue_scripts', 'my_custom_login_styles');
 
