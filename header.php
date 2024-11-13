@@ -19,27 +19,30 @@
         <p><?php bloginfo('description'); ?></p>
       <?php endif; ?>
     </div>
+    <div class="menu-toggle" id="menu-toggle">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
     <nav id="site-navigation">
       <?php
       if ( is_user_logged_in() ) {
         $user = wp_get_current_user();
-        if ( in_array('travel_manager', (array) $user->roles ) ) {
+        if ( in_array( 'travel_manager', (array) $user->roles ) ) {
           wp_nav_menu(array(
             'theme_location' => 'travel-manager-menu'
           ));
         } else {
-          wp_nav_menu(array(
-            'theme_location' => 'main-menu'
-          ));
+          if ( in_array( 'administrator', (array) $user->roles ) ) {
+            wp_nav_menu(array('theme_location' => 'main-menu'));
+          }
         }
       } else {
         wp_nav_menu(array(
-          'theme_location' => 'main-menu'
+          'theme_location' => 'public-menu'
         ));
       }
       ?>
     </nav>
   </div>
 </header>
-</body>
-</html>
