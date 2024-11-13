@@ -29,6 +29,7 @@ function register_custom_menus() {
   register_nav_menus(array(
     'main-menu' => __('Main Menu'),
     'travel-manager-menu' => __('Travel Manager Menu'),
+    'public-menu' => __('Public Menu'),
   ));
 }
 add_action('init', 'register_custom_menus');
@@ -117,6 +118,7 @@ function guest_data_application_theme_scripts() {
   wp_enqueue_script('custom-logout-script', get_template_directory_uri() . '/js/logout.js', ['jquery'], null, true);
   wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', ['jquery'], null, true);
   wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', ['jquery'], null, true);
+  wp_enqueue_script('nav-js', get_template_directory_uri() . '/js/nav.js', ['jquery'], null, true);
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
 
@@ -168,3 +170,25 @@ function include_private_posts_in_search($query) {
   return $query;
 }
 add_filter('pre_get_posts', 'include_private_posts_in_search');
+
+// Custom login
+
+// Enqueue custom styles for the login page
+function my_custom_login_styles() {
+  // Path to your custom logo in the theme directory
+  $custom_logo_url = get_template_directory_uri() . '/images/login-logo.png';
+
+}
+add_action('login_enqueue_scripts', 'my_custom_login_styles');
+
+// Change the URL of the login logo to your site homepage
+function my_custom_login_logo_url() {
+  return home_url(); // Change this to the URL you want to link the logo to
+}
+add_filter('login_headerurl', 'my_custom_login_logo_url');
+
+// Change the title attribute of the login logo
+function my_custom_login_logo_url_title() {
+  return get_bloginfo('name');
+}
+add_filter('login_headertext', 'my_custom_login_logo_url_title');
