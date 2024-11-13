@@ -1,7 +1,7 @@
 <?php
 get_header(); ?>
   <div class="wrapper">
-    <div class="container mt-5 mb-5">
+    <div class="container background-color-none mt-5 mb-5">
       <main id="main-content">
         <h1>Welcome to Guest Data Application Theme</h1>
 
