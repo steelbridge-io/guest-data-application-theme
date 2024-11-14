@@ -3,7 +3,7 @@ get_header(); ?>
   <div class="wrapper">
     <div class="container background-color-none mt-5 mb-5">
       <main id="main-content">
-        <h1>Welcome to Guest Data Application Theme</h1>
+        <h1>Welcome!! TFS Guest Data</h1>
 
         <?php //if (!is_user_logged_in()): // Check if user is not logged in ?>
           <div class="form-container">
