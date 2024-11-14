@@ -28,14 +28,19 @@
       <?php
       if ( is_user_logged_in() ) {
         $user = wp_get_current_user();
+
         if ( in_array( 'travel_manager', (array) $user->roles ) ) {
           wp_nav_menu(array(
             'theme_location' => 'travel-manager-menu'
           ));
-        } else {
-          if ( in_array( 'administrator', (array) $user->roles ) ) {
-            wp_nav_menu(array('theme_location' => 'main-menu'));
-          }
+        } else if ( in_array( 'administrator', (array) $user->roles ) ) {
+          wp_nav_menu(array(
+            'theme_location' => 'main-menu'
+          ));
+        } else if ( in_array( 'destination', (array) $user->roles ) ) {
+          wp_nav_menu(array(
+            'theme_location' => 'destination-menu'
+          ));
         }
       } else {
         wp_nav_menu(array(

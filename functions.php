@@ -30,6 +30,7 @@ function register_custom_menus() {
     'main-menu' => __('Main Menu'),
     'travel-manager-menu' => __('Travel Manager Menu'),
     'public-menu' => __('Public Menu'),
+    'destination-menu' => __('Destination Menu'),
   ));
 }
 add_action('init', 'register_custom_menus');
