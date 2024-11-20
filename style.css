@@ -159,6 +159,9 @@ body a {
   .menu-destination-menu-container {
     margin-left: auto;
   }
+  .menu-tfs-staff-container {
+    margin-left: auto;
+  }
 }
 @media (max-width: 768px) {
   .menu-toggle {
@@ -337,7 +340,6 @@ body footer {
   color: #fff;
   text-align: center;
   padding: 20px;
-  position: absolute;
   bottom: 0;
   width: 100%;
   z-index: 99;
