@@ -38,9 +38,13 @@
             'theme_location' => 'main-menu'
           ));
         } else if ( in_array( 'destination', (array) $user->roles ) ) {
-          wp_nav_menu(array(
-            'theme_location' => 'destination-menu'
-          ));
+	        wp_nav_menu( array(
+		        'theme_location' => 'destination-menu'
+	        ) );
+        } else if ( in_array( 'tfs_staff', (array) $user->roles ) ) {
+	        wp_nav_menu( array(
+		        'theme_location' => 'tfs-staff-menu'
+	        ) );
         }
       } else {
         wp_nav_menu(array(
