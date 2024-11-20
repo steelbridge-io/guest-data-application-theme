@@ -1,0 +1,21 @@
+/*
+Theme Name: Guest Data Application Theme
+Theme URI: http://example.com/guest-data-application-theme
+Author: Chris Parsons
+Author URI: http://parsonshosting.com
+Description: A basic theme for guest data application.
+Version: 1.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: guest-data-application-theme
+*/
+
+@import "supports/reset";
+@import "supports/fonts";
+@import "supports/global";
+@import "supports/header";
+@import "supports/home";
+@import "supports/posts-pages";
+@import "supports/footer";
+@import "supports/forms";
+@import "supports/search";

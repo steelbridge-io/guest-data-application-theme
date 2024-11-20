@@ -22,8 +22,10 @@ get_header(); ?>
                         <input type="password" name="pwd" id="pwd" class="input" value="" size="20" /></label>
                     </p>
                     <p>
-                      <label for="rememberme">
-                        <input type="checkbox" name="rememberme" id="rememberme" value="forever" /> Remember Me</label>
+                      <label for="rememberme" class="login-remeberme">
+                        <input type="checkbox" name="rememberme" id="rememberme" value="forever" />
+                        <span class="remember-text">Remember Me</span>
+                      </label>
                     </p>
                     <p>
                       <input type="submit" name="wp-submit" id="wp-submit" value="Log In" />

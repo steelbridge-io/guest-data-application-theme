@@ -1,0 +1,123 @@
+.form-container {
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.form-container .row .col-md-6 {
+  margin-top: 1.618em;
+  margin-bottom: 1.618em;
+}
+
+.form-container .row .col-md-6 .card {
+  background: #eee;
+  justify-items: center;
+  height: 100%;
+  padding-top: 1.618em;
+  padding-bottom: 1.618em;
+}
+
+.card .login-form,
+.card .registration-form {
+  margin: 0 auto;
+}
+
+.login-form, .registration-form {
+  width: 45%;
+}
+
+.login-form input, .registration-form input {
+  padding: 10px;
+  margin-top: 5px;
+}
+
+.login-form input[type="submit"], .registration-form input[type="submit"] {
+  background-color: #0073aa;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.login-form input[type="submit"]:hover, .registration-form input[type="submit"]:hover {
+  background-color: #006799;
+}
+
+
+#filter-cont.filter-wrap form label {
+  margin: 0 0.5em 0 0;
+}
+
+#filter-cont.filter-wrap form .btn {
+  border: none;
+  margin-left: 1em;
+}
+
+.gform_button.button {
+  background-color: #B32018 !important;
+}
+.gform-theme.gform-theme--framework.gform_wrapper .button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)):focus, .gform-theme.gform-theme--framework.gform_wrapper .gform-theme-button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)):focus, .gform-theme.gform-theme--framework.gform_wrapper :where(:not(.mce-splitbtn)) > button:not([id*="mceu_"]):not(.mce-open):where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)):focus, .gform-theme.gform-theme--framework.gform_wrapper button.button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)):focus, .gform-theme.gform-theme--framework.gform_wrapper input:is([type="submit"], [type="button"], [type="reset"]).button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)):focus, .gform-theme.gform-theme--framework.gform_wrapper input:is([type="submit"], [type="button"], [type="reset"]):where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)):focus, .gform-theme.gform-theme--framework.gform_wrapper input[type="submit"].button.gform_button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)):focus {
+  --gf-local-bg-color: none;
+  --gf-local-border-color: none;
+  --gf-local-shadow: none;
+  --gf-local-color: #f5f5f5;
+}
+
+.gform-theme.gform-theme--framework.gform_wrapper .button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)), .gform-theme.gform-theme--framework.gform_wrapper .gform-theme-button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)), .gform-theme.gform-theme--framework.gform_wrapper :where(:not(.mce-splitbtn)) > button:not([id*="mceu_"]):not(.mce-open):where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)), .gform-theme.gform-theme--framework.gform_wrapper button.button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)), .gform-theme.gform-theme--framework.gform_wrapper input:is([type="submit"], [type="button"], [type="reset"]).button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)), .gform-theme.gform-theme--framework.gform_wrapper input:is([type="submit"], [type="button"], [type="reset"]):where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)), .gform-theme.gform-theme--framework.gform_wrapper input[type="submit"].button.gform_button:where(:not(.gform-theme-no-framework):not(.gform-theme__disable):not(.gform-theme__disable *):not(.gform-theme__disable-framework):not(.gform-theme__disable-framework *)) {
+  --gf-local-bg-color: #B32018 !important;
+  --gf-local-radius: var(--gf-ctrl-btn-radius);
+  --gf-local-border-color: var(--gf-ctrl-btn-border-color-primary);
+  --gf-local-border-style: var(--gf-ctrl-btn-border-style-primary);
+  --gf-local-border-width: var(--gf-ctrl-btn-border-width-primary);
+  --gf-local-border-block-start: var(--gf-local-border-width) var(--gf-local-border-style) var(--gf-local-border-color);
+  --gf-local-border-block-end: var(--gf-local-border-width) var(--gf-local-border-style) var(--gf-local-border-color);
+  --gf-local-border-inline-start: var(--gf-local-border-width) var(--gf-local-border-style) var(--gf-local-border-color);
+  --gf-local-border-inline-end: var(--gf-local-border-width) var(--gf-local-border-style) var(--gf-local-border-color);
+  --gf-local-shadow: var(--gf-ctrl-btn-shadow);
+  --gf-local-color: var(--gf-ctrl-btn-color-primary);
+  --gf-local-column-gap: var(--gf-ctrl-btn-icon-gap);
+  --gf-local-cursor: pointer;
+  --gf-local-display: inline-flex;
+  --gf-local-font-style: var(--gf-ctrl-btn-font-style);
+  --gf-local-font-weight: var(--gf-ctrl-btn-font-weight);
+  --gf-local-font-size: var(--gf-ctrl-btn-font-size);
+  --gf-local-font-family: var(--gf-ctrl-btn-font-family);
+  --gf-local-height: auto;
+  --gf-local-letter-spacing: var(--gf-ctrl-btn-letter-spacing);
+  --gf-local-line-height: var(--gf-ctrl-btn-line-height);
+  --gf-local-min-height: var(--gf-ctrl-btn-size);
+  --gf-local-min-width: auto;
+  --gf-local-opacity: var(--gf-ctrl-btn-opacity);
+  --gf-local-padding-y: var(--gf-ctrl-btn-padding-y);
+  --gf-local-padding-x: var(--gf-ctrl-btn-padding-x);
+  --gf-local-text-decoration: var(--gf-ctrl-btn-text-decoration);
+  --gf-local-text-transform: var(--gf-ctrl-btn-text-transform);
+  --gf-local-width: auto;
+  align-items: center;
+  -moz-column-gap: var(--gf-local-column-gap);
+  column-gap: var(--gf-local-column-gap);
+  cursor: var(--gf-local-cursor);
+  justify-content: center;
+  min-inline-size: var(--gf-local-min-width);
+  opacity: var(--
+  gf-local-opacity);
+  text-align: center;
+  -webkit-text-decoration: var(--gf-local-text-decoration);
+  text-decoration: var(--gf-local-text-decoration);
+  text-transform: var(--gf-local-text-transform);
+  vertical-align: top;
+}
+.login-form {
+  form {
+    p {
+      label.login-remeberme {
+        display: flex;
+        align-items: center;
+        .remember-text {
+          padding-top: 5.4px !important;
+          margin-left: 2px;
+        }
+      }
+    }
+  }
+}
+
