@@ -1,6 +1,7 @@
 <?php
 /**
  * Template Name: Guest Data Questionnaires
+ * Template Post Type: page
  */
 
 get_header(); ?>
