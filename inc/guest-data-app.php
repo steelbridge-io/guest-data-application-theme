@@ -9,10 +9,10 @@ add_post_type_support('travel-form', 'thumbnail');
 function travel_form() {
 
   $labels = array(
-    'name'                  => _x('Travel Form', 'Post Type General Name', 'travel_domain'),
-    'singular_name'         => _x('Travel Form', 'Post Type Singular Name', 'travel_domain'),
-    'menu_name'             => __('Travel Form', 'travel_domain'),
-    'name_admin_bar'        => __('Travel Form', 'travel_domain'),
+    'name'                  => _x('Guest Data', 'Post Type General Name', 'travel_domain'),
+    'singular_name'         => _x('Guest Data', 'Post Type Singular Name', 'travel_domain'),
+    'menu_name'             => __('Guest Data', 'travel_domain'),
+    'name_admin_bar'        => __('Guest Data', 'travel_domain'),
     'archives'              => __('Item Archives', 'travel_domain'),
     'attributes'            => __('Item Attributes', 'travel_domain'),
     'parent_item_colon'     => __('Parent Item:', 'travel_domain'),
@@ -38,8 +38,8 @@ function travel_form() {
     'filter_items_list'     => __('Filter items list', 'travel_domain'),
   );
   $args = array(
-    'label'                 => __('Travel Form', 'travel_domain'),
-    'description'           => __('Travel Forms', 'travel_domain'),
+    'label'                 => __('Guest Data', 'travel_domain'),
+    'description'           => __('Guest Data', 'travel_domain'),
     'labels'                => $labels,
     'supports'              => array('title', 'editor', 'excerpt', 'author', 'thumbnail', 'comments', 'trackbacks', 'revisions', 'page-attributes', 'post-formats'),
     'hierarchical'          => false,
