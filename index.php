@@ -5,13 +5,14 @@ get_header(); ?>
       <main id="main-content">
         <h1>Welcome!! TFS Guest Data</h1>
 
-        <?php //if (!is_user_logged_in()): // Check if user is not logged in ?>
+        <?php if (!is_user_logged_in()): // Check if user is not logged in ?>
           <div class="form-container">
             <div class="row">
               <div class="col-md-6">
                 <div class="card">
                 <div class="login-form">
                   <h2>Login</h2>
+                  <p class="login-description">Please enter your credentials to log in.</p>
                   <form action="<?php echo wp_login_url(); ?>" method="post">
                     <p>
                       <label for="log">Username or Email<br />
@@ -27,10 +28,12 @@ get_header(); ?>
                         <span class="remember-text">Remember Me</span>
                       </label>
                     </p>
+                    <!-- The reCaptcha token will be added here via JavaScript -->
                     <p>
                       <input type="submit" name="wp-submit" id="wp-submit" value="Log In" />
                     </p>
                   </form>
+                  <a href="<?php echo wp_lostpassword_url(); ?>" class="lost-password-link">Lost your password?</a>
                 </div>
               </div>
             </div>
@@ -52,6 +55,7 @@ get_header(); ?>
                     <label for="user_password">Password<br />
                       <input type="password" name="user_password" id="user_password" class="input" value="" size="25" /></label>
                   </p>
+                  <!-- The reCaptcha token will be added here via JavaScript -->
                   <p>
                     <input type="submit" name="wp-submit" id="wp-submit" value="Register" />
                   </p>
@@ -61,9 +65,9 @@ get_header(); ?>
             </div>
           </div>
         </div>
-        <?php //else: // If user is logged in ?>
-          <!-- <p>You are already logged in.</p> -->
-        <?php //endif; ?>
+        <?php else: // If user is logged in ?>
+          <h2 class="logged-in">You are currently logged in</h2>
+        <?php endif; ?>
       </main>
     </div>
     <?php get_footer(); ?>
