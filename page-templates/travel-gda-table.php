@@ -1,6 +1,7 @@
 <?php
 /**
  * Template Name: Guest Data Tables
+ * Template Post Type: page
  */
 
 get_header(); ?>
