@@ -121,6 +121,11 @@ function guest_data_application_theme_scripts() {
   wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', ['jquery'], null, true);
   wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', ['jquery'], null, true);
   wp_enqueue_script('nav-js', get_template_directory_uri() . '/js/nav.js', ['jquery'], null, true);
+  if (is_front_page()) { // Check if we are on the front page (index.php)
+    wp_enqueue_script('google-recaptcha', 'https://www.google.com/recaptcha/api.js?render=6Lf-pYQqAAAAACH2PMrn77ojtGqtJ27peYjCHGdz', array(), null, true);
+    wp_enqueue_script('recaptcha-script', get_template_directory_uri() . '/js/captcha-front-page.js', ['jquery'],
+      null, true);
+  }
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
 
@@ -132,28 +137,32 @@ function guest_data_application_admin_scripts() {
 add_action('admin_enqueue_scripts', 'guest_data_application_admin_scripts');
 
 // Register custom templates
-function guest_data_application_register_custom_templates($templates) {
+// Register custom templates for travel-form post type
+function guest_data_application_register_travel_form_templates($post_templates, $wp_theme, $post) {
   $directory = get_template_directory() . '/questionnaire-templates/';
 
-  // Ensure the directory exists
-  if ($handler = opendir($directory)) {
+  // Ensure the directory exists and is for 'travel-form' post type
+  if ($post->post_type === 'travel-form' && $handler = opendir($directory)) {
     while (false !== ($file = readdir($handler))) {
       if (strpos($file, '.php') !== false) {
-        $templates[$file] = $file;
+        $post_templates['questionnaire-templates/' . $file] = str_replace('.php', '', $file);
       }
     }
     closedir($handler);
   }
 
-  return $templates;
+  return $post_templates;
 }
-add_filter('theme_page_templates', 'guest_data_application_register_custom_templates');
+add_filter('theme_post_templates', 'guest_data_application_register_travel_form_templates', 10, 3);
 
+
+// Load custom template
 // Load custom template
 function guest_data_application_load_custom_template($template) {
   global $post;
 
-  if (isset($post->page_template) && $post->page_template) {
+  // Check if the post type is 'travel-form' and template is set
+  if ($post && $post->post_type === 'travel-form' && isset($post->page_template) && $post->page_template) {
     $custom_template = locate_template('questionnaire-templates/' . $post->page_template);
     if ($custom_template) {
       return $custom_template;
@@ -230,3 +239,63 @@ function my_custom_login_logo_url_title() {
   return get_bloginfo('name');
 }
 add_filter('login_headertext', 'my_custom_login_logo_url_title');
+
+// Function to include private posts and pages in nav menu meta box
+function include_private_posts_in_menu_editor($query) {
+  if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'nav-menus.php') {
+    $post_type = $query->get('post_type');
+
+    if (in_array($post_type, array('page', 'post'))) {
+      $query->set('post_status', array('publish', 'private'));
+    }
+  }
+}
+add_action('pre_get_posts', 'include_private_posts_in_menu_editor');
+
+// Ensure nav menu meta box items include private content
+function add_private_posts_to_nav_menu($items, $menu, $args) {
+  if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'nav-menus.php') {
+    foreach ($items as $item) {
+      if ('private' === get_post_status($item->object_id)) {
+        $item->title .= ' (Private)';
+      }
+    }
+  }
+  return $items;
+}
+add_filter('wp_get_nav_menu_items', 'add_private_posts_to_nav_menu', 10, 3);
+
+add_action('login_form', 'verify_recaptcha_on_login');
+
+function verify_recaptcha_on_login() {
+  if (isset($_POST['recaptcha_response'])) {
+    $captcha_secret = '6Lf-pYQqAAAAABtM65vB8Z9uPAs8xpcXPEfM4bft';
+    $recaptcha_response = sanitize_text_field($_POST['recaptcha_response']);
+    $response = wp_remote_get("https://www.google.com/recaptcha/api/siteverify?secret={$captcha_secret}&response={$recaptcha_response}");
+    $response_body = wp_remote_retrieve_body($response);
+    $result = json_decode($response_body);
+
+    if (!$result->success) {
+      wp_die('reCaptcha verification failed!');
+    }
+  }
+}
+
+add_action('admin_post_register_user', 'verify_recaptcha_on_registration');
+add_action('admin_post_nopriv_register_user', 'verify_recaptcha_on_registration');
+
+function verify_recaptcha_on_registration() {
+  if (isset($_POST['recaptcha_response'])) {
+    $captcha_secret = '6Lf-pYQqAAAAABtM65vB8Z9uPAs8xpcXPEfM4bft';
+    $recaptcha_response = sanitize_text_field($_POST['recaptcha_response']);
+    $response = wp_remote_get("https://www.google.com/recaptcha/api/siteverify?secret={$captcha_secret}&response={$recaptcha_response}");
+    $response_body = wp_remote_retrieve_body($response);
+    $result = json_decode($response_body);
+
+    if (!$result->success) {
+      wp_die('reCaptcha verification failed!');
+    }
+  }
+
+  // Proceed with the rest of your registration logic here
+}
