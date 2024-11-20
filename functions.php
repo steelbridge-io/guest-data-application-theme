@@ -31,6 +31,7 @@ function register_custom_menus() {
     'travel-manager-menu' => __('Travel Manager Menu'),
     'public-menu' => __('Public Menu'),
     'destination-menu' => __('Destination Menu'),
+    'tfs-staff-menu' => __('TFS Staff Menu'),
   ));
 }
 add_action('init', 'register_custom_menus');
