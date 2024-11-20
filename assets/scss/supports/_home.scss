@@ -1,6 +1,14 @@
-.home #main-content h1 {
-  color: #f5f5f5;
-  text-align: center;
+.home {
+  #main-content {
+    h1 {
+      color: #f5f5f5;
+      text-align: center;
+    }
+    h2.logged-in {
+      color: #f5f5f5;
+      text-align: center;
+    }
+  }
 }
 
 body.home {
