@@ -121,3 +121,15 @@
   }
 }
 
+.gform_title {
+  margin-top: 1.618em;
+  text-align: center;
+}
+.gfield.gfield--type-html {
+  img {
+    max-width: 200px;
+    display: block;
+    margin: 0 auto 1em auto;
+  }
+}
+
