@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Name: Travel Form Posts v2
+ * Template Name: Guest Data Template
  * Template Post Type: travel-form
  * Developed for The Fly Shop
  *
