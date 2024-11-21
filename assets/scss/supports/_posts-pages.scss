@@ -55,7 +55,8 @@
   width: 100%;
 }
 
-#question-grid.table-wrapper th, #question-grid.table-wrapper td {
+#question-grid.table-wrapper th,
+#question-grid.table-wrapper td {
   padding: 8px 12px;
   border: 1px solid #ccc;
   color: #000000;
@@ -89,7 +90,8 @@
   padding-left: calc(var(--bs-gutter-x)* .7);
 }
 
-.questionnaire-list-wrapper {
+.questionnaire-list-wrapper,
+.guest-data-list-wrapper {
   padding-top: 5.618em;
   padding-bottom: 5.618em;
   background-color: #D9D4C5;
