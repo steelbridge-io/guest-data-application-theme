@@ -5,8 +5,8 @@
  */
 
 get_header(); ?>
-
-<div class="container container-flex-none mt-5">
+<div class="container-fluid questionnaire-list-wrapper">
+<div class="container container-flex-none">
   <h1><?php echo the_title(); ?></h1>
 
 <?php
@@ -26,7 +26,7 @@ endif;
 ?>
 </div>
 
-  <div class="container travel-item-list mt-5 mb-5">
+  <div class="container travel-item-list padding-top-1 padding-bottom-2">
     <div class="row">
       <div class="col-12">
         <div class="well mt-5 mb-5">
@@ -67,5 +67,6 @@ endif;
       ?>
     </div>
   </div>
+</div>
 
 <?php get_footer(); ?>

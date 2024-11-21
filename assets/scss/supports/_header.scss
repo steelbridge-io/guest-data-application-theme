@@ -82,6 +82,17 @@
 }
 
 @media (min-width: 767.99px) {
+
+  #site-navigation {
+    li {
+      font-size: 1.3rem;
+      margin-left: 1.5em;
+      a[aria-current="page"] {
+        color: #aaa;
+      }
+    }
+  }
+
   .menu-main-menu-container {
     margin-left: auto;
   }
