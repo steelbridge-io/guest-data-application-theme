@@ -85,49 +85,131 @@ function remove_default_logout_link($wp_admin_bar) {
 add_action('admin_bar_menu', 'remove_default_logout_link', 999);
 
 /*
-    * Adds permalink to Publish section inside the editor for post-type "travel-questionnaire"
-    * */
+* Adds permalink to Publish section inside the editor for post-type "travel-questionnaire"
+* */
 
 function add_permalink_to_publish_box() {
-  global $post, $pagenow;
+    global $post, $pagenow;
 
-  if ( $pagenow == 'post.php' && in_array($post->post_type, ['travel-questionnaire', 'travel-form']) ) {
-    $post_id = $post->ID;
-    $permalink = get_permalink($post_id);
-    ?>
-    <div class="misc-pub-section misc-pub-permalink">
-      <strong><?php _e('Permalink:'); ?></strong>
-      <span id="sample-permalink">
-          <a href="<?php echo esc_url($permalink); ?>" target="_blank"><?php echo esc_html($permalink); ?></a>
-      </span>
-    </div>
+    if ( $pagenow == 'post.php' && in_array($post->post_type, ['travel-questionnaire', 'travel-form']) ) {
+      $post_id = $post->ID;
+      $permalink = get_permalink($post_id);
+      ?>
+      <div class="misc-pub-section misc-pub-permalink">
+        <strong><?php _e('Permalink:'); ?></strong>
+        <span id="sample-permalink">
+            <a href="<?php echo esc_url($permalink); ?>" target="_blank"><?php echo esc_html($permalink); ?></a>
+        </span>
+      </div>
     <?php
   }
 }
 add_action('post_submitbox_misc_actions', 'add_permalink_to_publish_box');
 
+function async_css_load($tag, $handle) {
+  if ('bootstrap5' !== $handle) {
+    return $tag;
+  }
+  return str_replace("rel='stylesheet'", "rel='preload' as='style' onload=\"this.onload=null;this.rel='stylesheet'\"", $tag);
+}
+add_filter('style_loader_tag', 'async_css_load', 10, 2);
+
+function add_async_defer_attributes($tag, $handle) {
+  // Add async to specific scripts
+  $scripts_to_async = array('hero-template-jquery', 'hero-template-bootstrapjs');
+  foreach ($scripts_to_async as $async_script) {
+    if ($async_script === $handle) {
+      return str_replace(' src', ' async="async" src', $tag);
+    }
+  }
+  // Add defer to specific scripts
+  $scripts_to_defer = array('custom-logout-script', 'form-table-js', 'nav-js', 'google-recaptcha', 'recaptcha-script');
+  foreach ($scripts_to_defer as $defer_script) {
+    if ($defer_script === $handle) {
+      return str_replace(' src', ' defer="defer" src', $tag);
+    }
+  }
+  return $tag;
+}
+add_filter('script_loader_tag', 'add_async_defer_attributes', 10, 2);
+
+function dequeue_gf_scripts_and_styles() {
+  // Dequeue Gravity Forms styles
+  wp_dequeue_style('gforms_css');
+
+  // Dequeue Gravity Forms scripts
+  wp_dequeue_script('gforms_gravityforms');
+  wp_dequeue_script('gforms_json');
+  wp_dequeue_script('gforms_placeholder');
+}
+add_action('wp_print_styles', 'dequeue_gf_scripts_and_styles', 100);
+add_action('wp_enqueue_scripts', 'dequeue_gf_scripts_and_styles', 100);
+
+function enqueue_gf_scripts_conditionally() {
+  // Check if the current post type is 'travel-questionnaire'
+  if (is_singular('travel-questionnaire')) {
+    // Re-enqueue styles
+    wp_enqueue_style('gforms_css');
+
+    // Re-enqueue scripts
+    wp_enqueue_script('gforms_gravityforms');
+    wp_enqueue_script('gforms_json');
+    wp_enqueue_script('gforms_placeholder');
+  }
+}
+add_action('wp_enqueue_scripts', 'enqueue_gf_scripts_conditionally');
+
 // Enqueue scripts and styles for the frontend
 function guest_data_application_theme_scripts() {
-  // Enqueue theme style.css
+
   wp_enqueue_style('guest-data-application-theme-style', get_stylesheet_uri());
 
-  // Enqueue Bootstrap styles and scripts
+  // Enqueue and defer Bootstrap CSS
   wp_enqueue_style('bootstrap5', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css', [], '5.2.2', 'all');
+
+  // Enqueue and async/defer scripts
   wp_enqueue_script('hero-template-jquery', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js', array(), '', true);
   wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', ['jquery'], '5.2.1', true);
 
   // Custom script to handle logout without confirmation
   wp_enqueue_script('custom-logout-script', get_template_directory_uri() . '/js/logout.js', ['jquery'], null, true);
-  wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', ['jquery'], null, true);
+
+  if (is_page_template('questionnaire-templates/guest-data-template.php')) {
+    wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', ['jquery'], null, true);
+  }
+
   wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', ['jquery'], null, true);
   wp_enqueue_script('nav-js', get_template_directory_uri() . '/js/nav.js', ['jquery'], null, true);
+
   if (is_front_page()) { // Check if we are on the front page (index.php)
-    wp_enqueue_script('google-recaptcha', 'https://www.google.com/recaptcha/api.js?render=6Lf-pYQqAAAAACH2PMrn77ojtGqtJ27peYjCHGdz', array(), null, true);
-    wp_enqueue_script('recaptcha-script', get_template_directory_uri() . '/js/captcha-front-page.js', ['jquery'],
-      null, true);
+
+    $recaptcha_site_key = defined('RECAPTCHA_SITE_KEY') ? RECAPTCHA_SITE_KEY : '';
+
+    if (!empty($recaptcha_site_key)) {
+      wp_enqueue_script(
+        'google-recaptcha',
+        "https://www.google.com/recaptcha/api.js?render={$recaptcha_site_key}",
+        array(),
+        null,
+        true
+      );
+    } else {
+      // Handle the case where RECAPTCHA_SITE_KEY is not defined
+      error_log('RECAPTCHA_SITE_KEY is not defined in wp-config.php');
+    }
+    //wp_enqueue_script('google-recaptcha', 'https://www.google.com/recaptcha/api.js?render=6Lf-pYQqAAAAACH2PMrn77ojtGqtJ27peYjCHGdz', array(), null, true);
+    wp_enqueue_script('recaptcha-script', get_template_directory_uri() . '/js/captcha-front-page.js', ['jquery'], null, true);
+
+    // Localize script to pass site key
+    wp_localize_script('recaptcha-script', 'recaptchaConfig', array(
+      'siteKey' => $recaptcha_site_key
+    ));
   }
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
+
+// Temporary test to ensure the key is loaded
+error_log('Recaptcha Site Key: ' . (defined('RECAPTCHA_SITE_KEY') ? RECAPTCHA_SITE_KEY : 'Not Defined'));
 
 // Enqueue scripts and styles for admin
 function guest_data_application_admin_scripts() {
@@ -136,7 +218,6 @@ function guest_data_application_admin_scripts() {
 }
 add_action('admin_enqueue_scripts', 'guest_data_application_admin_scripts');
 
-// Register custom templates
 // Register custom templates for travel-form post type
 function guest_data_application_register_travel_form_templates($post_templates, $wp_theme, $post) {
   $directory = get_template_directory() . '/questionnaire-templates/';
@@ -155,8 +236,6 @@ function guest_data_application_register_travel_form_templates($post_templates, 
 }
 add_filter('theme_post_templates', 'guest_data_application_register_travel_form_templates', 10, 3);
 
-
-// Load custom template
 // Load custom template
 function guest_data_application_load_custom_template($template) {
   global $post;
@@ -269,7 +348,7 @@ add_action('login_form', 'verify_recaptcha_on_login');
 
 function verify_recaptcha_on_login() {
   if (isset($_POST['recaptcha_response'])) {
-    $captcha_secret = '6Lf-pYQqAAAAABtM65vB8Z9uPAs8xpcXPEfM4bft';
+    $captcha_secret = RECAPTCHA_SECRET_KEY;
     $recaptcha_response = sanitize_text_field($_POST['recaptcha_response']);
     $response = wp_remote_get("https://www.google.com/recaptcha/api/siteverify?secret={$captcha_secret}&response={$recaptcha_response}");
     $response_body = wp_remote_retrieve_body($response);
@@ -286,7 +365,7 @@ add_action('admin_post_nopriv_register_user', 'verify_recaptcha_on_registration'
 
 function verify_recaptcha_on_registration() {
   if (isset($_POST['recaptcha_response'])) {
-    $captcha_secret = '6Lf-pYQqAAAAABtM65vB8Z9uPAs8xpcXPEfM4bft';
+    $captcha_secret = RECAPTCHA_SECRET_KEY;
     $recaptcha_response = sanitize_text_field($_POST['recaptcha_response']);
     $response = wp_remote_get("https://www.google.com/recaptcha/api/siteverify?secret={$captcha_secret}&response={$recaptcha_response}");
     $response_body = wp_remote_retrieve_body($response);
@@ -296,6 +375,5 @@ function verify_recaptcha_on_registration() {
       wp_die('reCaptcha verification failed!');
     }
   }
-
   // Proceed with the rest of your registration logic here
 }
