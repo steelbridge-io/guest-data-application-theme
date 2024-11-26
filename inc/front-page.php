@@ -56,7 +56,7 @@ function restrict_subscriber_login($user, $username, $password) {
   // Check if the user has the role 'subscriber'
   if (in_array('subscriber', (array) $user->roles)) {
     // Return an error message instead of successful authentication
-    return new WP_Error('pending_approval', __('<strong>ERROR</strong>: Subscribers are not allowed to login pending approval.'));
+    return new WP_Error('pending_approval', __('<strong>ERROR</strong>: Hello! Your registration is still pending approval. Please contact us with questions.'));
   }
 
   return $user;
@@ -71,7 +71,7 @@ function custom_login_error_message($error) {
     if (strpos($error, $code) !== false) {
       switch ($code) {
         case 'pending_approval':
-          return '<div class="error"><p>' . __('Subscribers are not allowed to login pending approval.') . '</p></div>';
+          return '<div class="error"><p>' . __('Hello! Your registration is still pending approval. Questions? Contact us.') . '</p></div>';
           break;
       }
     }
@@ -123,7 +123,7 @@ add_action('init', 'start_session', 1);
 function prevent_subscriber_login($user_login, $user) {
   if (in_array('subscriber', (array) $user->roles)) {
     wp_logout(); // Force logout
-    $_SESSION['login_error'] = 'Subscribers are not allowed to login pending approval.';
+    $_SESSION['login_error'] = 'Hello! Your registration is pending approval. If you have not heard from us in over 24 hours since you registered, please contact us.';
     wp_redirect(home_url());
     exit();
   }
@@ -133,7 +133,7 @@ add_action('wp_login', 'prevent_subscriber_login', 10, 2);
 // Show error message on the login page
 function show_pending_message() {
   if (isset($_GET['pending']) && $_GET['pending'] == 'true') {
-    echo '<div class="error"><p>Subscribers are not allowed to login.</p></div>';
+    echo '<div class="error"><p>Uh oh... We have not approved your registration. Please contact us with questions.</p></div>';
   }
 }
 
