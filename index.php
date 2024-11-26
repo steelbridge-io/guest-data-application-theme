@@ -89,36 +89,63 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
                 <div class="registration-form">
                   <h2>Register</h2>
                   <?php if (isset($_GET['registered']) && $_GET['registered'] == 'true'): ?>
-                    <div class="success"><p>Thank you for registering. Your request is pending review.</p></div>
+                    <div class="success"><p>Thank you for registering. Your request is pending review. Please allow us 48 hours to verify your registration. Upon approval, we will send conformation to the email address provided. Please record your registration password, email and user name for future reference.</p></div>
                   <?php elseif (isset($_GET['registration_error'])): ?>
                     <div class="error"><p>Registration failed. Please try again.</p></div>
                   <?php else: ?>
-                    <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" class="registration-form">
+                    <form id="registration-form-home" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" class="registration-form">
                       <input type="hidden" name="action" value="register_user">
-                      <p>
-                        <label for="user_login">Username<br />
-                          <input type="text" name="user_login" id="user_login" class="input" value="" size="20" /></label>
-                      </p>
-                      <p>
-                        <label for="user_email">Email<br />
-                          <input type="email" name="user_email" id="user_email" class="input" value="" size="25" /></label>
-                      </p>
-                      <p>
-                        <label for="first_name">First Name<br />
-                          <input type="text" name="first_name" id="first_name" class="input" value="" size="20" /></label>
-                      </p>
-                      <p>
-                        <label for="last_name">Last Name<br />
-                          <input type="text" name="last_name" id="last_name" class="input" value="" size="20" /></label>
-                      </p>
-                      <p>
-                        <label for="user_password">Password<br />
-                          <input type="password" name="user_password" id="user_password" class="input" value="" size="25" /></label>
-                      </p>
-                      <!-- The reCaptcha token will be added here via JavaScript -->
-                      <p>
-                        <input type="submit" name="wp-submit-register" id="wp-submit-register" value="Register" />
-                      </p>
+
+                      <div class="container">
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="user_login">Username</label>
+                              <input type="text" name="user_login" id="user_login" class="form-control" value="" />
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="user_email">Email</label>
+                              <input type="email" name="user_email" id="user_email" class="form-control" value="" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="first_name">First Name</label>
+                              <input type="text" name="first_name" id="first_name" class="form-control" value="" />
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="last_name">Last Name</label>
+                              <input type="text" name="last_name" id="last_name" class="form-control" value="" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="form-group">
+                              <label for="user_password">Password</label>
+                              <input type="password" name="user_password" id="user_password" class="form-control" value="" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- The reCaptcha token will be added here via JavaScript -->
+
+                        <div class="row mt-3">
+                          <div class="col-md-12">
+                            <div class="form-group">
+                              <input type="submit" name="wp-submit-register" id="wp-submit-register" class="btn btn-primary" value="Register" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </form>
                   <?php endif; ?>
                 </div>

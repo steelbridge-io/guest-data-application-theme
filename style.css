@@ -437,7 +437,7 @@ body.home footer {
   margin: 0 auto; }
 
 .login-form, .registration-form {
-  width: 45%; }
+  /*width: 45%;*/ }
 
 .login-form input, .registration-form input {
   padding: 10px;
