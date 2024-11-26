@@ -197,7 +197,8 @@ function guest_data_application_theme_scripts() {
       // Handle the case where RECAPTCHA_SITE_KEY is not defined
       error_log('RECAPTCHA_SITE_KEY is not defined in wp-config.php');
     }
-    //wp_enqueue_script('google-recaptcha', 'https://www.google.com/recaptcha/api.js?render=6Lf-pYQqAAAAACH2PMrn77ojtGqtJ27peYjCHGdz', array(), null, true);
+    //wp_enqueue_script('google-recaptcha', 'https://www.google.com/recaptcha/api
+    //.js?render=6Lf-pYQqAAAAACH2PMrn77ojtGqtJ27peYjCHGdz', array(), null, true);
     wp_enqueue_script('recaptcha-script', get_template_directory_uri() . '/js/captcha-front-page.js', ['jquery'], null, true);
 
     // Localize script to pass site key
@@ -345,6 +346,53 @@ function add_private_posts_to_nav_menu($items, $menu, $args) {
 add_filter('wp_get_nav_menu_items', 'add_private_posts_to_nav_menu', 10, 3);
 
 add_action('login_form', 'verify_recaptcha_on_login');
+add_action('admin_post_register_user', 'verify_recaptcha_on_registration');
+add_action('admin_post_nopriv_register_user', 'verify_recaptcha_on_registration');
+
+function verify_recaptcha($recaptcha_response) {
+	if (!defined('RECAPTCHA_SECRET_KEY') || empty(RECAPTCHA_SECRET_KEY)) {
+		error_log('RECAPTCHA_SECRET_KEY is missing or not defined in wp-config.php');
+		wp_die('Configuration error');
+	}
+	
+	$captcha_secret = RECAPTCHA_SECRET_KEY;
+	$response = wp_remote_get("https://www.google.com/recaptcha/api/siteverify?secret={$captcha_secret}&response={$recaptcha_response}");
+	
+	if (is_wp_error($response)) {
+		error_log('Failed to contact reCaptcha server: ' . $response->get_error_message());
+		wp_die('Failed to verify reCaptcha, please try again.');
+	}
+	
+	$response_body = wp_remote_retrieve_body($response);
+	$result = json_decode($response_body);
+	
+	if (empty($result) || !$result->success) {
+		wp_die('reCaptcha verification failed!');
+	}
+	
+	return true;
+}
+
+function verify_recaptcha_on_login() {
+	if (isset($_POST['recaptcha_response'])) {
+		$recaptcha_response = sanitize_text_field($_POST['recaptcha_response']);
+		verify_recaptcha($recaptcha_response);
+	}
+}
+
+function verify_recaptcha_on_registration() {
+	if (isset($_POST['recaptcha_response'])) {
+		$recaptcha_response = sanitize_text_field($_POST['recaptcha_response']);
+		verify_recaptcha($recaptcha_response);
+	}
+	// Proceed with the rest of your registration logic here
+}
+
+
+
+/*****
+
+add_action('login_form', 'verify_recaptcha_on_login');
 
 function verify_recaptcha_on_login() {
   if (isset($_POST['recaptcha_response'])) {
@@ -376,4 +424,43 @@ function verify_recaptcha_on_registration() {
     }
   }
   // Proceed with the rest of your registration logic here
+} *******/
+
+function custom_register_user() {
+	if (isset($_POST['user_login'], $_POST['user_email'], $_POST['user_password'])) {
+		$user_login = sanitize_text_field($_POST['user_login']);
+		$user_email = sanitize_email($_POST['user_email']);
+		$user_password = sanitize_text_field($_POST['user_password']);
+		$first_name = sanitize_text_field($_POST['first_name']);
+		$last_name = sanitize_text_field($_POST['last_name']);
+		
+		// Debugging log for checking input data
+		error_log("Registering user: $user_login, Email: $user_email, First Name: $first_name, Last Name: $last_name");
+		
+		$userdata = array(
+			'user_login' => $user_login,
+			'user_email' => $user_email,
+			'user_pass'  => $user_password,
+			'first_name' => $first_name,
+			'last_name'  => $last_name,
+		);
+		
+		$user_id = wp_insert_user($userdata);
+		
+		if (!is_wp_error($user_id)) {
+			// Optionally log in the user immediately after registration
+			wp_set_current_user($user_id);
+			wp_set_auth_cookie($user_id);
+			wp_redirect(home_url()); // Redirect to home or any other page
+			exit();
+		} else {
+			$error_message = $user_id->get_error_message();
+			error_log("User registration failed: $error_message");
+			// Handle the error appropriately
+			wp_redirect(home_url('/register-error')); // Redirect to an error page or display error
+			exit();
+		}
+	}
 }
+add_action('admin_post_register_user', 'custom_register_user');
+add_action('admin_post_nopriv_register_user', 'custom_register_user');
