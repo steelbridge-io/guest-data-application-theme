@@ -9,6 +9,20 @@
   background-color: #eeeeee;
 }
 
+.wrapper {
+  #registration-form-home {
+    .container {
+      padding: 0;
+    }
+  }
+}
+
+.registration-form {
+  padding: 1.618em;
+  .success {
+    font-size: 18px;
+  }
+}
 .container-flex-none {
   flex: none;
 }

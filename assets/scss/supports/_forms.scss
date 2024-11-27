@@ -30,6 +30,13 @@
   /*width: 45%;*/
 }
 
+.login-card {
+  .login-form {
+    padding: 1.618em 0;
+    width: 45%;
+  }
+}
+
 .login-form input, .registration-form input {
   padding: 10px;
   margin-top: 5px;
@@ -135,6 +142,24 @@
     max-width: 200px;
     display: block;
     margin: 0 auto 1em auto;
+  }
+}
+
+@media (max-width: 992px) {
+  .login-card {
+    .login-form {
+      padding: 1.618em;
+      width: 95%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    .login-form {
+      padding: 1.618em;
+      width: 95%;
+    }
   }
 }
 

@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
         <div class="form-container">
           <div class="row">
             <div class="col-md-6">
-              <div class="card">
+              <div class="card login-card">
                 <div class="login-form">
                   <h2>Login</h2>
                   <p class="login-description">Please enter your credentials to log in.</p>
@@ -61,14 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
                   }
                   ?>
                   <form action="<?php echo esc_url(home_url()); ?>" method="post">
-                    <p>
-                      <label for="log">Username or Email<br />
-                        <input type="text" name="log" id="log" class="input" value="" size="20" /></label>
-                    </p>
-                    <p>
-                      <label for="pwd">Password<br />
-                        <input type="password" name="pwd" id="pwd" class="input" value="" size="20" /></label>
-                    </p>
+                    <div class="form-group">
+                      <label for="log">Username or Email</label>
+                        <input type="text" name="log" id="log" class="form-control" value="" />
+                    </div>
+                    <div class="form-group">
+                        <label for="pwd">Password</label>
+                        <input type="password" name="pwd" id="pwd" class="form-control" value="" />
+                    </div>
                     <p>
                       <label for="rememberme" class="login-rememberme">
                         <input type="checkbox" name="rememberme" id="rememberme" value="forever" />
@@ -76,9 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
                       </label>
                     </p>
                     <!-- The reCaptcha token will be added here via JavaScript -->
-                    <p>
-                      <input type="submit" name="wp-submit-login" id="wp-submit-login" value="Log In" />
-                    </p>
+                    <div class="form-group">
+                      <input type="submit" name="wp-submit-login" id="wp-submit-login" class="btn btn-primary" value="Log In" />
+                    </div>
                   </form>
                   <a href="<?php echo wp_lostpassword_url(); ?>" class="lost-password-link">Lost your password?</a>
                 </div>
@@ -93,18 +93,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
                   <?php elseif (isset($_GET['registration_error'])): ?>
                     <div class="error"><p>Registration failed. Please try again.</p></div>
                   <?php else: ?>
-                    <form id="registration-form-home" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" class="registration-form">
+                    <form id="registration-form-home" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" >
                       <input type="hidden" name="action" value="register_user">
 
                       <div class="container">
                         <div class="row">
-                          <div class="col-md-6">
+                          <div class="col-lg-6">
                             <div class="form-group">
                               <label for="user_login">Username</label>
                               <input type="text" name="user_login" id="user_login" class="form-control" value="" />
                             </div>
                           </div>
-                          <div class="col-md-6">
+                          <div class="col-lg-6">
                             <div class="form-group">
                               <label for="user_email">Email</label>
                               <input type="email" name="user_email" id="user_email" class="form-control" value="" />
@@ -113,13 +113,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
                         </div>
 
                         <div class="row">
-                          <div class="col-md-6">
+                          <div class="col-lg-6">
                             <div class="form-group">
                               <label for="first_name">First Name</label>
                               <input type="text" name="first_name" id="first_name" class="form-control" value="" />
                             </div>
                           </div>
-                          <div class="col-md-6">
+                          <div class="col-lg-6">
                             <div class="form-group">
                               <label for="last_name">Last Name</label>
                               <input type="text" name="last_name" id="last_name" class="form-control" value="" />
