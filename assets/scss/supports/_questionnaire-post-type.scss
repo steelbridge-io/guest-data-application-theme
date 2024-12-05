@@ -1,0 +1,41 @@
+.travel-questionnaire-template,
+.travel-questionnaire-template-default {
+  .entry-title {
+    display: none;
+  }
+}
+
+.travel-questionnaire-template-default,
+.travel-questionnaire-template {
+  .wrapper {
+    position: relative;
+    overflow: hidden;
+    background-color: #D9D4C5;
+    .container {
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  .wrapper::before,
+  .wrapper::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .wrapper::before {
+    top: 0;
+    left: 0;
+    height: 650px;
+    background: linear-gradient(172deg, #333 49.8%, rgba(51, 51, 51, 0.01) 50%, transparent 55%);
+  }
+
+  .wrapper::after {
+    bottom: 0;
+    left: 0;
+    height: 650px;
+    background: linear-gradient(-353deg, #333 49.8%, rgba(51, 51, 51, 0.01) 50%, transparent 55%);
+  }
+}

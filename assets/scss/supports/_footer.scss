@@ -1,0 +1,20 @@
+body footer {
+  background: #333;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  bottom: 0;
+  width: 100%;
+  z-index: 99;
+}
+
+body.home footer {
+  background: #333;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  z-index: 99;
+}
