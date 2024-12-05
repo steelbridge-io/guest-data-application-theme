@@ -110,15 +110,6 @@ function handle_user_registration() {
 add_action('admin_post_nopriv_register_user', 'handle_user_registration');
 add_action('admin_post_register_user', 'handle_user_registration');
 
-// Start session to track error messages
-function start_session() {
-  if (!session_id()) {
-    session_start();
-  }
-}
-
-add_action('init', 'start_session', 1);
-
 // Prevent subscribers from logging in
 function prevent_subscriber_login($user_login, $user) {
   if (in_array('subscriber', (array) $user->roles)) {

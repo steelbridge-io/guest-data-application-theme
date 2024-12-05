@@ -1,4 +1,11 @@
 <?php
+function start_session() {
+	if (session_status() === PHP_SESSION_NONE) {
+		session_start();
+	}
+}
+
+add_action('init', 'start_session', 1);
 // Theme setup
 function guest_data_application_theme_setup() {
   // Add default posts and comments RSS feed links to head.
@@ -205,7 +212,7 @@ function guest_data_application_theme_scripts() {
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
 
 // Temporary test to ensure the key is loaded
-error_log('Recaptcha Site Key: ' . (defined('RECAPTCHA_SITE_KEY') ? RECAPTCHA_SITE_KEY : 'Not Defined'));
+//error_log('Recaptcha Site Key: ' . (defined('RECAPTCHA_SITE_KEY') ? RECAPTCHA_SITE_KEY : 'Not Defined'));
 
 // Enqueue scripts and styles for admin
 function guest_data_application_admin_scripts() {
@@ -392,3 +399,125 @@ add_action('admin_notices', function() {
     echo '<div class="notice notice-info"><p>' . esc_html($custom_redirect_url) . '</p></div>';
   }
 });
+
+/*** Testing ****/
+// Add the custom field to the user profile page
+function add_requested_destination_to_profile($user) {
+ $value = get_user_meta($user->ID, 'requested_destination_15', true); // Fetch the saved value
+ ?>
+    <h3><?php _e('Custom User Information', 'your-plugin-textdomain'); ?></h3>
+    <table class="form-table">
+        <tr>
+            <th><label for="requested_destination_15"><?php _e('Requested Travel Destination', 'your-plugin-textdomain'); ?></label></th>
+            <td>
+                <input type="text" name="requested_destination_15" id="requested_destination_15" value="<?php echo esc_attr($value); ?>" class="regular-text">
+                <p class="description"><?php _e('Please enter your requested travel destination.', 'your-plugin-textdomain'); ?></p>
+            </td>
+        </tr>
+    </table>
+ <?php
+}
+
+// Save the custom field value
+function save_requested_destination_to_profile($user_id) {
+ if (!current_user_can('edit_user', $user_id)) {
+  return false;
+ }
+
+ if (isset($_POST['requested_destination_15'])) {
+  update_user_meta($user_id, 'requested_destination_15', sanitize_text_field($_POST['requested_destination_15']));
+ }
+}
+add_action('personal_options_update', 'save_requested_destination_to_profile');
+add_action('edit_user_profile_update', 'save_requested_destination_to_profile');
+
+
+/** Rgistration logic **/
+// Handle custom registration register_user
+add_action('admin_post_nopriv_register_user', 'handle_custom_registration');
+add_action('admin_post_register_user', 'handle_custom_registration');
+function handle_custom_registration() {
+ error_log('handle_custom_registration triggered.');
+ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['wp-submit-login'])) {
+  // Verify nonce
+  if (!isset($_POST['registration_nonce']) || !wp_verify_nonce($_POST['registration_nonce'], 'custom-registration-form')) {
+   wp_die('Security check failed.');
+  }
+
+  // Sanitize input data
+  $user_login = sanitize_user($_POST['user_login'], true);
+  $user_email = sanitize_email($_POST['user_email']);
+  $user_first = sanitize_text_field($_POST['first_name']);
+  $user_last  = sanitize_text_field($_POST['last_name']);
+  $user_pass  = sanitize_text_field($_POST['user_password']);
+
+  // Create user data array
+  $userdata = array(
+   'user_login' => $user_login,
+   'user_email' => $user_email,
+   'first_name' => $user_first,
+   'last_name'  => $user_last,
+   'user_pass'  => $user_pass,
+  );
+
+  // Insert user into the network
+  $user_id = wp_insert_user($userdata);
+
+  if (!is_wp_error($user_id)) {
+   // Add user to subsite 15
+   add_user_to_blog(15, $user_id, 'subscriber');
+
+   // Save requested_destination_15 meta if it exists in the form
+   if (isset($_POST['requested_destination_15'])) {
+    $requested_destination = sanitize_text_field($_POST['requested_destination_15']);
+    update_user_meta($user_id, 'requested_destination_15', $requested_destination);
+   }
+
+   // Redirect after successful registration
+   wp_redirect(home_url('?registered=true'));
+   exit();
+  } else {
+   // Handle registration error
+   error_log('Registration error: ' . $user_id->get_error_message());
+   wp_redirect(home_url('?registration_error=true'));
+   exit();
+  }
+ }
+}
+add_action('show_user_profile', 'add_requested_destination_to_profile');
+add_action('edit_user_profile', 'add_requested_destination_to_profile');
+
+
+function add_toolbar_fallback_script() {
+ if (is_admin_bar_showing()) {
+  ?>
+     <script type="text/javascript">
+         document.addEventListener("DOMContentLoaded", function() {
+             var isFirefox = typeof InstallTrigger !== 'undefined';
+             if (isFirefox && !document.getElementById('wpadminbar')) {
+                 location.reload();
+             }
+         });
+     </script>
+  <?php
+ }
+}
+add_action('wp_footer', 'add_toolbar_fallback_script');
+
+function add_csp_header() {
+ $csp_header = "default-src 'self'";
+ $csp_header .= "; script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://cdn.jsdelivr.net https://stats.wpmucdn.com https://www.google.com/recaptcha/";
+ $csp_header .= "; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net";
+ $csp_header .= "; img-src 'self' data: https://tfs-spaces.sfo2.digitaloceanspaces.com https://stats1.wpmudev.com";
+ $csp_header .= "; font-src 'self' https://fonts.gstatic.com";
+ $csp_header .= "; connect-src 'self' https://stats1.wpmudev.com";
+ $csp_header .= "; object-src 'none'";
+ $csp_header .= "; frame-src 'self' https://www.google.com";
+ $csp_header .= "; worker-src 'self' blob:";
+ $csp_header .= "; upgrade-insecure-requests";
+
+ header("Content-Security-Policy: " . $csp_header);
+}
+
+add_action('send_headers', 'add_csp_header');
+

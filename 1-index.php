@@ -81,38 +81,38 @@ get_header(); ?>
                               <div class="registration-form">
                                   <h2>Register</h2>
 																
-																<?php
-																if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['wp-submit-login'])) {
-																	// Include WordPress functions to handle user registration
-																	require_once($_SERVER['DOCUMENT_ROOT'] . '/wp-load.php');
-																	
-																	$username = sanitize_text_field($_POST['username']);
-																	$email = sanitize_email($_POST['email']);
-																	$password = $_POST['password'];
-																	$requested_destination = sanitize_text_field($_POST['requested_destination']);
-																	
-																	// Validate form inputs (this is a basic example, you should add more validations)
-																	if (!empty($username) && !empty($email) && !empty($password) && !empty($requested_destination)) {
-																		$user_id = wp_create_user($username, $password, $email);
-																		
-																		if (!is_wp_error($user_id)) {
-																			// Assign the "subscriber" role (or any role you prefer)
-																			$user = new WP_User($user_id);
-																			$user->set_role('subscriber');
-																			
-																			// Save the requested destination to user meta
-																			update_user_meta($user_id, 'requested_destination', $requested_destination);
-																			
-																			// Display a confirmation message
-																			echo '<p>Thank you for registering! Your registration request has been received and is being reviewed.</p>';
-																		} else {
-																			echo '<p>Error: ' . $user_id->get_error_message() . '</p>';
-																		}
-																	} else {
-																		echo '<p>All fields are required.</p>';
-																	}
-																}
-																?>
+                                <?php
+                                if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['wp-submit-login'])) {
+                                    // Include WordPress functions to handle user registration
+                                    require_once($_SERVER['DOCUMENT_ROOT'] . '/wp-load.php');
+
+                                    $username = sanitize_text_field($_POST['username']);
+                                    $email = sanitize_email($_POST['email']);
+                                    $password = $_POST['password'];
+                                    $requested_destination = sanitize_text_field($_POST['requested_destination']);
+
+                                    // Validate form inputs (this is a basic example, you should add more validations)
+                                    if (!empty($username) && !empty($email) && !empty($password) && !empty($requested_destination)) {
+                                        $user_id = wp_create_user($username, $password, $email);
+
+                                        if (!is_wp_error($user_id)) {
+                                            // Assign the "subscriber" role (or any role you prefer)
+                                            $user = new WP_User($user_id);
+                                            $user->set_role('subscriber');
+
+                                            // Save the requested destination to user meta
+                                            update_user_meta($user_id, 'requested_destination', $requested_destination);
+
+                                            // Display a confirmation message
+                                            echo '<p>Thank you for registering! Your registration request has been received and is being reviewed.</p>';
+                                        } else {
+                                            echo '<p>Error: ' . $user_id->get_error_message() . '</p>';
+                                        }
+                                    } else {
+                                        echo '<p>All fields are required.</p>';
+                                    }
+                                }
+                                ?>
 
                                   <form method="POST" action="">
                                       <p>

@@ -1,162 +1,149 @@
 <?php
 get_header();
 
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
-
 // Process the login form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
-  // Get login credentials
+function handle_login() {
+ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['wp-submit-login'])) {
+  check_admin_referer('custom-login-form');
+
   $creds = array(
-    'user_login'    => sanitize_text_field($_POST['log']),
-    'user_password' => sanitize_text_field($_POST['pwd']),
-    'remember'      => isset($_POST['rememberme']),
+   'user_login'    => sanitize_user($_POST['log']),
+   'user_password' => sanitize_text_field($_POST['pwd']),
+   'remember'      => isset($_POST['rememberme']),
   );
 
-  // Attempt to sign the user in
   $user = wp_signon($creds, false);
 
-  // Check if there was an error logging in
   if (is_wp_error($user)) {
-    $_SESSION['login_error'] = $user->get_error_message();
+   $error = $user->get_error_message();
+   echo '<div class="error"><p>' . esc_html($error) . '</p></div>';
   } else {
-    // Check if the user has the 'subscriber' role
-    if (in_array('subscriber', $user->roles)) {
-      wp_logout(); // Log the subscriber out
-      $_SESSION['login_error'] = 'Subscribers are not allowed to login pending approval.';
-    } else {
-      // Check for a custom redirect URL
-      $custom_redirect_url = get_user_meta($user->ID, 'custom_redirect_url', true);
-      if ($custom_redirect_url) {
-        // Redirect to the custom URL if set
-        wp_redirect($custom_redirect_url);
-      } else {
-        // Redirect to homepage if no custom URL is set
-        wp_redirect(home_url());
-      }
-      exit();
+   if (user_can($user, 'subscriber')) {
+    wp_logout();
+    echo '<div class="error"><p>Subscribers are not allowed to login pending approval.</p></div>';
+   } else {
+    $redirect_url = home_url();
+    $custom_url   = get_user_meta($user->ID, 'custom_redirect_url', true);
+    if ($custom_url) {
+     $redirect_url = esc_url($custom_url);
     }
+    wp_safe_redirect($redirect_url);
+    exit();
+   }
   }
+ }
 }
+add_action('template_redirect', 'handle_login');
 ?>
 
 <div class="wrapper">
-  <div class="container background-color-none mt-5 mb-5">
-    <main id="main-content">
-      <h1>Welcome!! TFS Guest Data</h1>
-
-      <?php if (!is_user_logged_in()): // Check if user is not logged in ?>
-        <div class="form-container">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="card login-card">
-                <div class="login-form">
-                  <h2>Login</h2>
-                  <p class="login-description">Please enter your credentials to log in.</p>
-                  <?php
-                  if (isset($_SESSION['login_error'])) {
-                    echo '<div class="error"><p>' . $_SESSION['login_error'] . '</p></div>';
-                    unset($_SESSION['login_error']); // Clear the error after displaying it
-                  }
-                  ?>
-                  <form action="<?php echo esc_url(home_url()); ?>" method="post">
-                    <div class="form-group">
-                      <label for="log">Username or Email</label>
-                        <input type="text" name="log" id="log" class="form-control" value="" />
-                    </div>
-                    <div class="form-group">
-                        <label for="pwd">Password</label>
-                        <input type="password" name="pwd" id="pwd" class="form-control" value="" />
-                    </div>
-                    <p>
-                      <label for="rememberme" class="login-rememberme">
-                        <input type="checkbox" name="rememberme" id="rememberme" value="forever" />
-                        <span class="remember-text">Remember Me</span>
-                      </label>
-                    </p>
-                    <!-- The reCaptcha token will be added here via JavaScript -->
-                    <div class="form-group">
-                      <input type="submit" name="wp-submit-login" id="wp-submit-login" class="btn btn-primary" value="Log In" />
-                    </div>
-                  </form>
-                  <a href="<?php echo wp_lostpassword_url(); ?>" class="lost-password-link">Lost your password?</a>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="card">
-                <div class="registration-form">
-                  <h2>Register</h2>
-                  <?php if (isset($_GET['registered']) && $_GET['registered'] == 'true'): ?>
-                    <div class="success"><p>Thank you for registering. Your request is pending review. Please allow us 48 hours to verify your registration. Upon approval, we will send conformation to the email address provided. Please record your registration password, email and user name for future reference.</p></div>
-                  <?php elseif (isset($_GET['registration_error'])): ?>
-                    <div class="error"><p>Registration failed. Please try again.</p></div>
-                  <?php else: ?>
-                    <form id="registration-form-home" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" >
-                      <input type="hidden" name="action" value="register_user">
-
-                      <div class="container">
-                        <div class="row">
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label for="user_login">Username</label>
-                              <input type="text" name="user_login" id="user_login" class="form-control" value="" />
-                            </div>
-                          </div>
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label for="user_email">Email</label>
-                              <input type="email" name="user_email" id="user_email" class="form-control" value="" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="row">
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label for="first_name">First Name</label>
-                              <input type="text" name="first_name" id="first_name" class="form-control" value="" />
-                            </div>
-                          </div>
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label for="last_name">Last Name</label>
-                              <input type="text" name="last_name" id="last_name" class="form-control" value="" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="row">
-                          <div class="col-md-12">
-                            <div class="form-group">
-                              <label for="user_password">Password</label>
-                              <input type="password" name="user_password" id="user_password" class="form-control" value="" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- The reCaptcha token will be added here via JavaScript -->
-
-                        <div class="row mt-3">
-                          <div class="col-md-12">
-                            <div class="form-group">
-                              <input type="submit" name="wp-submit-register" id="wp-submit-register" class="btn btn-primary" value="Register" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </form>
-                  <?php endif; ?>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      <?php else: // If user is logged in ?>
-        <h2 class="logged-in">You are currently logged in</h2>
-      <?php endif; ?>
-    </main>
-  </div>
-  <?php get_footer(); ?>
+    <div class="container background-color-none mt-5 mb-5">
+        <main id="main-content">
+            <h1>Welcome!! TFS Guest Data</h1>
+         <?php if (!is_user_logged_in()): ?>
+             <div class="form-container">
+                 <div class="row">
+                     <div class="col-md-6">
+                         <div class="card login-card">
+                             <div class="login-form">
+                                 <h2>Login</h2>
+                                 <p class="login-description">Please enter your credentials to log in.</p>
+                                 <form action="<?php echo esc_url(wp_login_url()); ?>" method="post">
+                                  <?php wp_nonce_field('custom-login-form', 'registration_nonce'); ?>
+                                     <div class="form-group">
+                                         <label for="log">Username or Email</label>
+                                         <input type="text" name="log" id="log" class="form-control" value=""/>
+                                     </div>
+                                     <div class="form-group">
+                                         <label for="pwd">Password</label>
+                                         <input type="password" name="pwd" id="pwd" class="form-control" value=""/>
+                                     </div>
+                                     <p>
+                                         <label for="rememberme" class="login-rememberme">
+                                             <input type="checkbox" name="rememberme" id="rememberme" value="forever"/>
+                                             <span class="remember-text">Remember Me</span>
+                                         </label>
+                                     </p>
+                                     <div class="form-group">
+                                         <input type="submit" name="wp-submit-login" id="wp-submit-login" class="btn btn-primary" value="Log In"/>
+                                     </div>
+                                 </form>
+                                 <a href="<?php echo wp_lostpassword_url(); ?>" class="lost-password-link">Lost your password?</a>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="col-md-6">
+                         <div class="card">
+                             <div class="registration-form">
+                                 <h2>Register</h2>
+                              <?php if (isset($_GET['registered']) && $_GET['registered'] == 'true'): ?>
+                                  <div class="success"><p>Thank you for registering. Your request is pending review. Please allow us 48 hours to verify your registration. Upon approval, we will send confirmation to the email address provided. Please record your registration password, email, and username for future reference.</p></div>
+                              <?php elseif (isset($_GET['registration_error'])): ?>
+                                  <div class="error"><p>Registration failed. Please try again.</p></div>
+                              <?php else: ?>
+                                  <form id="registration-form-home" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
+                                   <?php wp_nonce_field('custom-registration-form', 'registration_nonce'); ?>
+                                      <input type="hidden" name="action" value="register_user">
+                                      <div class="container">
+                                          <div class="row">
+                                              <div class="col-lg-6">
+                                                  <div class="form-group">
+                                                      <label for="user_login">Username</label>
+                                                      <input type="text" name="user_login" id="user_login" class="form-control" value=""/>
+                                                  </div>
+                                              </div>
+                                              <div class="col-lg-6">
+                                                  <div class="form-group">
+                                                      <label for="user_email">Email</label>
+                                                      <input type="email" name="user_email" id="user_email" class="form-control" value=""/>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div class="row">
+                                              <div class="col-lg-6">
+                                                  <div class="form-group">
+                                                      <label for="first_name">First Name</label>
+                                                      <input type="text" name="first_name" id="first_name" class="form-control" value=""/>
+                                                  </div>
+                                              </div>
+                                              <div class="col-lg-6">
+                                                  <div class="form-group">
+                                                      <label for="last_name">Last Name</label>
+                                                      <input type="text" name="last_name" id="last_name" class="form-control" value=""/>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div class="row">
+                                              <div class="col-md-12">
+                                                  <div class="form-group">
+                                                      <label for="user_password">Password</label>
+                                                      <input type="password" name="user_password" id="user_password" class="form-control" value=""/>
+                                                  </div>
+                                                  <div class="form-group">
+                                                      <label for="requested_destination_15">Requested Destination</label>
+                                                      <input type="text" id="requested_destination_15" name="requested_destination_15" class="input destination-request form-control" required/>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div class="row mt-3">
+                                              <div class="col-md-12">
+                                                  <div class="form-group">
+                                                      <input type="submit" name="wp-submit-register" id="wp-submit-register" class="btn btn-primary" value="Register"/>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </form>
+                              <?php endif; ?>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         <?php else: ?>
+             <h2 class="logged-in">You are currently logged in</h2>
+         <?php endif; ?>
+        </main>
+    </div>
+ <?php get_footer(); ?>
 </div>
