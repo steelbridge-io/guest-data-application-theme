@@ -417,6 +417,8 @@ function add_requested_destination_to_profile($user) {
     </table>
  <?php
 }
+add_action('show_user_profile', 'add_requested_destination_to_profile');
+add_action('edit_user_profile', 'add_requested_destination_to_profile');
 
 // Save the custom field value
 function save_requested_destination_to_profile($user_id) {
@@ -430,63 +432,6 @@ function save_requested_destination_to_profile($user_id) {
 }
 add_action('personal_options_update', 'save_requested_destination_to_profile');
 add_action('edit_user_profile_update', 'save_requested_destination_to_profile');
-
-
-/** Rgistration logic **/
-// Handle custom registration register_user
-add_action('admin_post_nopriv_register_user', 'handle_custom_registration');
-add_action('admin_post_register_user', 'handle_custom_registration');
-function handle_custom_registration() {
- error_log('handle_custom_registration triggered.');
- if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['wp-submit-login'])) {
-  // Verify nonce
-  if (!isset($_POST['registration_nonce']) || !wp_verify_nonce($_POST['registration_nonce'], 'custom-registration-form')) {
-   wp_die('Security check failed.');
-  }
-
-  // Sanitize input data
-  $user_login = sanitize_user($_POST['user_login'], true);
-  $user_email = sanitize_email($_POST['user_email']);
-  $user_first = sanitize_text_field($_POST['first_name']);
-  $user_last  = sanitize_text_field($_POST['last_name']);
-  $user_pass  = sanitize_text_field($_POST['user_password']);
-
-  // Create user data array
-  $userdata = array(
-   'user_login' => $user_login,
-   'user_email' => $user_email,
-   'first_name' => $user_first,
-   'last_name'  => $user_last,
-   'user_pass'  => $user_pass,
-  );
-
-  // Insert user into the network
-  $user_id = wp_insert_user($userdata);
-
-  if (!is_wp_error($user_id)) {
-   // Add user to subsite 15
-   add_user_to_blog(15, $user_id, 'subscriber');
-
-   // Save requested_destination_15 meta if it exists in the form
-   if (isset($_POST['requested_destination_15'])) {
-    $requested_destination = sanitize_text_field($_POST['requested_destination_15']);
-    update_user_meta($user_id, 'requested_destination_15', $requested_destination);
-   }
-
-   // Redirect after successful registration
-   wp_redirect(home_url('?registered=true'));
-   exit();
-  } else {
-   // Handle registration error
-   error_log('Registration error: ' . $user_id->get_error_message());
-   wp_redirect(home_url('?registration_error=true'));
-   exit();
-  }
- }
-}
-add_action('show_user_profile', 'add_requested_destination_to_profile');
-add_action('edit_user_profile', 'add_requested_destination_to_profile');
-
 
 function add_toolbar_fallback_script() {
  if (is_admin_bar_showing()) {
@@ -504,6 +449,10 @@ function add_toolbar_fallback_script() {
 }
 add_action('wp_footer', 'add_toolbar_fallback_script');
 
+/**
+ * @return void
+ * CSP (Content Security Policy)
+ */
 function add_csp_header() {
  $csp_header = "default-src 'self'";
  $csp_header .= "; script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://cdn.jsdelivr.net https://stats.wpmucdn.com https://www.google.com/recaptcha/";
