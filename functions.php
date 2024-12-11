@@ -450,6 +450,29 @@ function add_toolbar_fallback_script() {
 add_action('wp_footer', 'add_toolbar_fallback_script');
 
 /**
+* Admin bypass for *required Gravity Form Fields
+*/
+
+add_filter( 'gform_field_validation_FORMID', function( $result, $value, $form, $field ) {
+if ( current_user_can( 'administrator' ) ) {
+$result['208'] = true; // Skip validation for admins
+}
+return $result;
+}, 10, 4 );
+
+add_filter( 'gform_validation', function( $validation_result ) {
+if ( current_user_can( 'administrator' ) ) {
+foreach ( $validation_result['form']['fields'] as &$field ) {
+$field['failed_validation'] = false;
+$field['validation_message'] = '';
+}
+$validation_result['is_valid'] = true;
+}
+return $validation_result;
+} );
+
+
+/**
  * @return void
  * CSP (Content Security Policy)
  */
