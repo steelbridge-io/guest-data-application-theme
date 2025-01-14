@@ -172,14 +172,12 @@ function guest_data_application_theme_scripts() {
 
   // Enqueue and async/defer scripts
   wp_enqueue_script('hero-template-jquery', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js', array(), '', true);
-  wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', ['jquery'], '5.2.1', true);
-
+  wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', array('jquery'), '5.2.1', true);
+  if (is_page_template('questionnaire-templates/guest-data-template.php')) {
+  wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', array('jquery'), null, true);
+  }
   // Custom script to handle logout without confirmation
   wp_enqueue_script('custom-logout-script', get_template_directory_uri() . '/js/logout.js', ['jquery'], null, true);
-
-  if (is_page_template('questionnaire-templates/guest-data-template.php')) {
-    wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', ['jquery'], null, true);
-  }
 
   wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', ['jquery'], null, true);
   wp_enqueue_script('nav-js', get_template_directory_uri() . '/js/nav.js', ['jquery'], null, true);
@@ -491,5 +489,5 @@ function add_csp_header() {
  header("Content-Security-Policy: " . $csp_header);
 }
 
-add_action('send_headers', 'add_csp_header');
+//add_action('send_headers', 'add_csp_header');
 

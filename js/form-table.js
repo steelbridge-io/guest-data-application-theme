@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function reinitializePopovers() {
         // Dispose of existing popovers
-        document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => {
+       document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => {
             const instance = bootstrap.Popover.getInstance(popoverTriggerEl);
             if (instance) {
                 instance.dispose();
@@ -122,4 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     reinitializePopovers();
+});
+
+
+<!-- Initialize Bootstrap Popover -->
+
+window.addEventListener('load', (event) => {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl, {
+            trigger: 'focus',
+            html: true
+        });
+    });
 });

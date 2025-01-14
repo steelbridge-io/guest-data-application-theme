@@ -262,8 +262,6 @@ if ($form_id) {
         $row_values[$allergies_field['label']] = $allergies_value;
       }
 
-      //////////
-
 
       if ($other_allergies_field) {
         $field_id = $other_allergies_field['id'];
@@ -366,7 +364,8 @@ if ($form_id) {
             if (strlen($cell_value) > 50) {
               $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($cell_value) . '">Read More</a>';
             }
-            $cell_value = esc_html($excerpt) . $popover_link;
+            //$cell_value = esc_html($excerpt) . $popover_link;
+           $cell_value = '<span contenteditable="true">' . esc_html($excerpt) . '</span>' . $popover_link;
             break;
           case 'address':
             // Handle address field specifically here if needed
@@ -400,7 +399,13 @@ if ($form_id) {
         if ($header === $name_field['label']) {
           echo '<td class="fixed-column">' . ($row_values[$header] ?? '&nbsp;') . '</td>';
         } else {
+          //echo '<td>' . ($row_values[$header] ?? '&nbsp;') . '</td>';
+         if (strpos($row_values[$header], 'contenteditable="true"') === false &&
+          strpos($row_values[$header], 'data-bs-toggle="popover"') === false) {
+          echo '<td><span contenteditable="true">' . ($row_values[$header] ?? '&nbsp;') . '</span></td>';
+         } else {
           echo '<td>' . ($row_values[$header] ?? '&nbsp;') . '</td>';
+         }
         }
       }
       echo '</tr>';
@@ -417,17 +422,3 @@ if ($form_id) {
 echo '</div>'; // End travel-form-posts div
 
 get_footer();
-?>
-
-<!-- Initialize Bootstrap Popover -->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-            return new bootstrap.Popover(popoverTriggerEl, {
-                trigger: 'focus',
-                html: true,
-            });
-        });
-    });
-</script>
