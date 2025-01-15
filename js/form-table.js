@@ -1,3 +1,5 @@
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const tableWrapper = document.querySelector('.table-wrapper');
     const tableScrollable = document.querySelector('.table-scrollable');
@@ -82,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function reinitializePopovers() {
+        const bootstrap = window.bootstrap; // Ensure bootstrap object is referenced
         // Dispose of existing popovers
        document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => {
             const instance = bootstrap.Popover.getInstance(popoverTriggerEl);
