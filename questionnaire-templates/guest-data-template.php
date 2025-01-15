@@ -85,6 +85,7 @@ if (isset($_GET['filter_arrival_date']) && !empty($_GET['filter_arrival_date']))
 
 if ($form_id) {
   $form = GFAPI::get_form($form_id);
+		error_log(print_r($form, true));
 
   if ($form) {
     // Retrieve form fields dynamically
@@ -188,7 +189,7 @@ if ($form_id) {
 
     // Render table rows with entry data
     foreach ($entries as $entry) {
-      echo '<tr>';
+      echo '<tr data-entry-id="' . esc_attr($entry['id']) . '">';
 
       // Collect values in an array to ensure consistent counts
       $row_values = [];
@@ -261,7 +262,6 @@ if ($form_id) {
         $allergies_value = !empty($checkbox_values) ? implode(', ', $checkbox_values) : '&nbsp;';
         $row_values[$allergies_field['label']] = $allergies_value;
       }
-
 
       if ($other_allergies_field) {
         $field_id = $other_allergies_field['id'];
@@ -394,7 +394,7 @@ if ($form_id) {
 
         $row_values[$field['label']] = $cell_value;
       }
-// Rendering the row values based on the unique headers
+						// Rendering the row values based on the unique headers
       foreach ($headers as $header) {
         if ($header === $name_field['label']) {
           echo '<td class="fixed-column">' . ($row_values[$header] ?? '&nbsp;') . '</td>';
@@ -402,7 +402,7 @@ if ($form_id) {
           //echo '<td>' . ($row_values[$header] ?? '&nbsp;') . '</td>';
          if (strpos($row_values[$header], 'contenteditable="true"') === false &&
           strpos($row_values[$header], 'data-bs-toggle="popover"') === false) {
-          echo '<td><span contenteditable="true">' . ($row_values[$header] ?? '&nbsp;') . '</span></td>';
+          echo '<td><span contenteditable="true" data-field-label="' . esc_attr($header) . '">' . ($row_values[$header] ?? '&nbsp;') . '</span></td>';
          } else {
           echo '<td>' . ($row_values[$header] ?? '&nbsp;') . '</td>';
          }
