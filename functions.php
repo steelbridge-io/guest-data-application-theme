@@ -173,14 +173,16 @@ function guest_data_application_theme_scripts() {
   // Enqueue and async/defer scripts
   wp_enqueue_script('hero-template-jquery', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js', array(), '', true);
   wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', array('jquery'), '5.2.1', true);
-  if (is_page_template('questionnaire-templates/guest-data-template.php')) {
-  wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', array('jquery'), null, true);
-  }
+
   // Custom script to handle logout without confirmation
   wp_enqueue_script('custom-logout-script', get_template_directory_uri() . '/js/logout.js', ['jquery'], null, true);
 
-  wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', ['jquery'], null, true);
+  wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', array('jquery', 'hero-template-bootstrapjs'), null, true);
   wp_enqueue_script('nav-js', get_template_directory_uri() . '/js/nav.js', ['jquery'], null, true);
+
+  if (is_page_template('questionnaire-templates/guest-data-template.php')) {
+  wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', array('jquery', 'hero-template-bootstrapjs'), null, true);
+  }
 
   if (is_front_page()) { // Check if we are on the front page (index.php)
 
@@ -206,6 +208,14 @@ function guest_data_application_theme_scripts() {
       'siteKey' => $recaptcha_site_key
     ));
   }
+
+wp_enqueue_script('table-save-logic', get_template_directory_uri() . '/js/table-save-logic.js', ['jquery'], null, true);
+
+wp_localize_script('table-save-logic', 'ajax_object', [
+'ajax_url' => admin_url('admin-ajax.php'),
+'security' => wp_create_nonce('table_save_nonce'),
+]);
+
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
 
@@ -469,6 +479,106 @@ $validation_result['is_valid'] = true;
 return $validation_result;
 } );
 
+/******* REST API ******/
+
+add_action('wp_ajax_update_gravity_form_entry', 'update_gravity_form_entry');
+add_action('wp_ajax_nopriv_update_gravity_form_entry', 'update_gravity_form_entry');
+
+function update_gravity_form_entry() {
+// Debug nonce received from Postman
+error_log('Generated Nonce: ' . wp_create_nonce('table_save_nonce'));
+error_log('Received Nonce: ' . (isset($_POST['security']) ? $_POST['security'] : 'None provided'));
+error_log('Received nonce: ' . ($_POST['security'] ?? 'Not sent'));
+error_log('Expected nonce: ' . wp_create_nonce('table_save_nonce'));
+error_log(print_r($_POST, true)); // Logs all POST data sent by the AJAX request
+// Verify nonce for security
+if (!check_ajax_referer('table_save_nonce', 'security', false)) {
+wp_send_json_error(['message' => 'Invalid security token']);
+wp_die();
+}
+
+// Fetch and sanitize inputs
+//$entry_id = isset($_POST['entry_id']) ? sanitize_text_field($_POST['entry_id']) : '';
+$entry_id = isset($_POST['entry_id']) ? intval($_POST['entry_id']) : 0;
+$field_label = isset($_POST['field_label']) ? sanitize_text_field($_POST['field_label']) : '';
+$updated_value = isset($_POST['updated_value']) ? sanitize_textarea_field($_POST['updated_value']) : '';
+
+// Debugging: Log inputs
+/*error_log("Entry ID Received: $entry_id");
+error_log("Field Label Received: $field_label");
+error_log("Updated Value Received: $updated_value");*/
+
+// Retrieve the entry
+$entry = GFAPI::get_entry($entry_id);
+if (is_wp_error($entry)) {
+//error_log("Error Retrieving Entry: " . $entry->get_error_message());
+wp_send_json_error(['message' => 'Entry not found: ' . $entry->get_error_message()]);
+wp_die();
+}
+
+// Debugging: Log the retrieved entry
+//error_log("Retrieved Entry: " . print_r($entry, true));
+
+// Retrieve the form and resolve the field ID
+$form_id = $entry['form_id'];
+$form = GFAPI::get_form($form_id);
+if (empty($form)) {
+//error_log("Form not found for Form ID: $form_id");
+wp_send_json_error(['message' => 'Form not found']);
+wp_die();
+}
+
+// Debugging: Log the retrieved form
+//error_log("Retrieved Form: " . print_r($form, true));
+
+// Find the field ID that matches the label
+$field_id = null;
+foreach ($form['fields'] as $field) {
+if (trim($field->label) === trim($field_label)) {
+$field_id = $field->id;
+break;
+}
+}
+
+if (!$field_id) {
+//error_log("Field Label '$field_label' Does Not Match Any Fields in the Form.");
+wp_send_json_error(['message' => 'Field could not be found for label: ' . $field_label]);
+wp_die();
+}
+
+// Debugging: Log the matched field ID
+//error_log("Matched Field ID: $field_id for Label: $field_label");
+
+// Check if the field exists in the entry object
+if (!array_key_exists($field_id, $entry)) {
+error_log("Field ID $field_id does not exist in the entry.");
+wp_send_json_error(['message' => "Field ID $field_id not available in entry."]);
+wp_die();
+}
+
+// Update the field in the entry
+$entry[$field_id] = $updated_value;
+
+// Debugging: Log entry before update
+//error_log("Entry Before Update: " . print_r($entry, true));
+
+// Update the entry and handle errors
+$result = GFAPI::update_entry($entry);
+if (is_wp_error($result)) {
+error_log("Error Updating Entry: " . $result->get_error_message());
+wp_send_json_error(['message' => 'Update failed: ' . $result->get_error_message()]);
+wp_die();
+}
+
+// Debugging: Log success
+//error_log("Entry Successfully Updated for ID: $entry_id. Updated Entry: " . print_r($entry, true));
+
+// Respond with success
+wp_send_json_success(['message' => 'Entry successfully updated.']);
+wp_die();
+}
+
+/*** /REST API **/
 
 /**
  * @return void
@@ -491,3 +601,8 @@ function add_csp_header() {
 
 //add_action('send_headers', 'add_csp_header');
 
+/*add_action('wp_head', function () {
+if (current_user_can('administrator')) { // Make sure it's only available to authenticated users
+echo '<script>console.log("Generated Nonce: ' . wp_create_nonce('table_save_nonce') . '");</script>';
+}
+});*/
