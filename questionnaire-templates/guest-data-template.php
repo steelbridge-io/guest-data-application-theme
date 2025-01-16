@@ -120,7 +120,7 @@ if ($form_id) {
         case 'name':
           $name_field = $field_entry;
           break;
-        case 'allergies (food and environmental)':
+        case 'allergies to food and environmental':
           $allergies_field = $field_entry;
           break;
         case 'other allergies':
