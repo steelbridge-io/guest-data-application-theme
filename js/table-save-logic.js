@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const saveButton = document.createElement("button");
     saveButton.textContent = "Save Changes";
     saveButton.setAttribute("type", "button");
-    saveButton.classList.add("btn", "btn-success");
+    saveButton.classList.add("btn", "btn-danger", "table-save-btn");
     saveButton.style.margin = "10px";
 
     // Add button below the table
