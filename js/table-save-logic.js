@@ -17,14 +17,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const target = event.target;
 
         if (target.tagName === "SPAN" && target.hasAttribute("contenteditable")) {
+
+            const isLessThanFifty = target.classList.contains("less-than-fifty");
             // Get necessary data from the <span>
             const entryId = target.closest("tr").getAttribute("data-entry-id");
             const fieldLabel = target.getAttribute("data-field-label");
-            const updatedValue = target.textContent.trim();
+            let updatedValue = target.textContent.trim();
 
             console.log("Entry ID:", entryId); // Debug: Check entry ID
             console.log("Field Label:", fieldLabel); // Debug: Check field label
             console.log("Updated Value:", updatedValue); // Debug: Check updated data
+
+            if (isLessThanFifty && updatedValue.length > 50) {
+                alert("Value exceeds 50 characters! Changes won’t be saved.");
+                return; // Stop processing for this specific update
+            }
 
             if (entryId && fieldLabel) {
                 // Find if this edit exists in updates; if not, add it
@@ -35,7 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (existingUpdate) {
                     existingUpdate.updatedValue = updatedValue;
                 } else {
-                    updates.push({ entryId, fieldLabel, updatedValue });
+                    updates.push({
+                        entryId,
+                        fieldLabel,
+                        updatedValue,
+                        fieldType: isLessThanFifty ?
+                            "less-than-fifty" : "standard-textarea",
+                    });
                 }
             }
         }
@@ -50,6 +63,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Use Ajax to save each change
         updates.forEach((data) => {
+            // Differentiate less-than-fifty and standard-textarea
+            if (data.fieldType === "less-than-fifty" && data.updatedValue.length > 50) {
+                console.error(
+                    "Skipping save for less-than-fifty field. Value exceeds allowed limit:",
+                    data
+                );
+                return;
+            }
+
             const ajaxData = {
                 action: "update_gravity_form_entry",
                 security: ajax_object.security,
