@@ -498,6 +498,7 @@ wp_die();
 }
 
 // Fetch and sanitize inputs
+global $entry_id;
 //$entry_id = isset($_POST['entry_id']) ? sanitize_text_field($_POST['entry_id']) : '';
 $entry_id = isset($_POST['entry_id']) ? intval($_POST['entry_id']) : 0;
 $field_label = isset($_POST['field_label']) ? sanitize_text_field($_POST['field_label']) : '';
