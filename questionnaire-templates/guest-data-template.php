@@ -126,7 +126,7 @@ if ($form_id) {
         case 'other allergies':
           $other_allergies_field = $field_entry;
           break;
-        case 'please list any special requests':
+        case 'please list any special requests, needs, dietary restrictions, health concerns, physical challenges':
           $special_requests_field = $field_entry;
           break;
         case 'reservation number':
