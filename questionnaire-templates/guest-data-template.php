@@ -126,7 +126,7 @@ if ($form_id) {
         case 'other allergies':
           $other_allergies_field = $field_entry;
           break;
-        case 'please list any special requests, needs, dietary restrictions, health concerns, physical challenges':
+        case 'please list any special requests':
           $special_requests_field = $field_entry;
           break;
         case 'reservation number':
@@ -271,18 +271,24 @@ if ($form_id) {
       }
 
       if ($special_requests_field) {
-        $field_id = $special_requests_field['id'];
-        $special_requests_value = rgar($entry, $field_id);
-        if (!empty($special_requests_value)) {
-          $excerpt = (strlen($special_requests_value) > 50) ? substr($special_requests_value, 0, 50) . '...' : $special_requests_value;
-          $popover_link = '';
-          if (strlen($special_requests_value) > 50) {
-            $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($special_requests_value) . '">Read More</a>';
-          }
-          $row_values[$special_requests_field['label']] = esc_html($excerpt) . $popover_link;
-        } else {
-          $row_values[$special_requests_field['label']] = '&nbsp;';
-        }
+      global $entry_id;
+      $field_id = $special_requests_field['id'];
+      $special_requests_value = rgar($entry, $field_id);
+      if (!empty($special_requests_value)) {
+      $excerpt = (strlen($special_requests_value) > 50) ? substr($special_requests_value, 0, 50) . '...' : $special_requests_value;
+      $popover_link = '';
+      if (strlen($special_requests_value) > 50) {
+      $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($special_requests_value) . '">Read More</a>';
+      $edit_button = '<button class="edit-long-textarea-btn" data-full-content="' . esc_attr($special_requests_value) . '" data-entry-id="' . esc_attr($entry_id) . '" data-field-id="' . esc_attr($special_requests_field['id']) . '">Edit</button>';
+
+      $row_values[$special_requests_field['label']] = '<span class="more-than-fifty" contenteditable="false" data-field-type="textarea"  data-field-label="' . esc_attr($special_requests_field['label']) . '" data-field-id="' . esc_attr($special_requests_field['id']) . '">' . esc_html($excerpt) . '</span>' . $popover_link . $edit_button;
+      } else {
+      $row_values[$special_requests_field['label']] = '<span class="less-than-fifty" contenteditable="true" title="Edit special requests (50 or fewer characters)" data-field-type="textarea" data-field-label="' . esc_attr($special_requests_field['label']) . '" data-field-id="' . esc_attr($special_requests_field['id']) . '">' . esc_html($excerpt) . '</span>';
+      }
+      } else {
+      // Handle empty content
+      $row_values[$special_requests_field['label']] = '<span class="no-special-requests">No special requests provided</span>';
+      }
       }
 
       if ($arrival_date_field) {
@@ -358,14 +364,14 @@ if ($form_id) {
             }
             $cell_value = !empty($checkbox_values) ? implode(', ', $checkbox_values) : '&nbsp;';
             break;
-          case 'textarea':
+            case 'textarea':
             $excerpt = (strlen($cell_value) > 50) ? substr($cell_value, 0, 50) . '...' : $cell_value;
             $popover_link = '';
             if (strlen($cell_value) > 50) {
               $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($cell_value) . '">Read More</a>';
             }
             //$cell_value = esc_html($excerpt) . $popover_link;
-           $cell_value = '<span contenteditable="true">' . esc_html($excerpt) . '</span>' . $popover_link;
+           $cell_value = '<span class="standard-textarea" contenteditable="true" data-field-label="' . esc_attr($header) . '" data-excerpt="' . esc_attr(substr($cell_value, 0, 50)) . '">' . esc_html($excerpt) . '</span>' . $popover_link;
             break;
           case 'address':
             // Handle address field specifically here if needed
@@ -402,7 +408,7 @@ if ($form_id) {
           //echo '<td>' . ($row_values[$header] ?? '&nbsp;') . '</td>';
          if (strpos($row_values[$header], 'contenteditable="true"') === false &&
           strpos($row_values[$header], 'data-bs-toggle="popover"') === false) {
-          echo '<td><span contenteditable="true" data-field-label="' . esc_attr($header) . '">' . ($row_values[$header] ?? '&nbsp;') . '</span></td>';
+          echo '<td><span class="no-popover" contenteditable="true" data-field-label="' . esc_attr($header) . '">' . ($row_values[$header] ?? '&nbsp;') . '</span></td>';
          } else {
           echo '<td>' . ($row_values[$header] ?? '&nbsp;') . '</td>';
          }
