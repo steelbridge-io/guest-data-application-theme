@@ -126,7 +126,7 @@ if ($form_id) {
         case 'other allergies':
           $other_allergies_field = $field_entry;
           break;
-        case 'please list any special requests, needs, dietary restrictions, health concerns, physical challenges':
+        case 'please list any special requests, needs, dietary restrictions, health concerns, physical challenges.':
           $special_requests_field = $field_entry;
           break;
         case 'reservation number':
@@ -283,7 +283,8 @@ if ($form_id) {
 
         if (strlen($special_requests_value) > 50) {
 				      $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($special_requests_value) . '">Read More</a>';
-				      $edit_button = '<button class="edit-long-textarea-btn" data-full-content="' . esc_attr($special_requests_value) . '" data-entry-id="' . esc_attr($entry_id) . '" data-field-id="' . esc_attr($special_requests_field['id']) . '" data-field-label="' . esc_attr($special_requests_field['label']) . '">Edit</button>';
+
+				      $edit_button = '<button class="edit-long-textarea-btn btn btn-danger table-edit-btn" data-full-content="' . esc_attr($special_requests_value) . '" data-entry-id="' . esc_attr($entry_id) . '" data-field-id="' . esc_attr($special_requests_field['id']) . '" data-field-label="' . esc_attr($special_requests_field['label']) . '">Edit</button>';
 
 				      $row_values[$special_requests_field['label']] = '<span class="more-than-fifty" contenteditable="false" data-field-type="textarea"  data-field-label="' . esc_attr($special_requests_field['label']) . '" data-field-id="' . esc_attr($special_requests_field['id']) . '">' . esc_html($excerpt) . '</span>' . $popover_link . $edit_button;
       } else {
@@ -375,7 +376,7 @@ if ($form_id) {
               $popover_link = ' <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="' . esc_html($cell_value) . '">Read More</a>';
 
 
-	            $edit_button = '<button class="edit-long-textarea-btn-two" data-entry-id="' . esc_attr($entry_id) . '" data-field-label="' . esc_attr($header) . '" data-full-content="' . esc_attr($cell_value) . '">Edit</button>';
+	            $edit_button = '<button class="edit-long-textarea-btn-two btn btn-danger table-edit-btn" data-entry-id="' . esc_attr($entry_id) . '" data-field-label="' . esc_attr($header) . '" data-full-content="' . esc_attr($cell_value) . '">Edit</button>';
 
 	            $cell_value = '<span class="standardtext-more-than-fifty" contenteditable="false" data-field-type="textarea"  data-field-label="' . esc_attr($header) . '" data-excerpt="' . esc_attr($excerpt) . '">' . esc_html($excerpt) . '</span>' . $popover_link . $edit_button;
             } else {
