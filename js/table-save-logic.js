@@ -142,11 +142,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const saveButton = document.createElement("button");
         saveButton.textContent = "Save";
-        saveButton.classList.add("btn", "btn-success", "save-edit-btn");
+        saveButton.classList.add("btn", "btn-danger", "save-edit-btn");
 
         const cancelButton = document.createElement("button");
         cancelButton.textContent = "Cancel";
-        cancelButton.classList.add("btn", "btn-secondary", "cancel-edit-btn");
+        cancelButton.classList.add("btn", "btn-danger", "cancel-edit-btn");
 
         cell.innerHTML = ""; // Clear the cell
         cell.appendChild(textarea);
