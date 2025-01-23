@@ -1,4 +1,6 @@
-
+/**
+ * Handles AJAX for the table editing function
+ * */
 document.addEventListener("DOMContentLoaded", () => {
     const table = document.querySelector("#gda-table");
     const saveButton = document.createElement("button");
@@ -7,34 +9,62 @@ document.addEventListener("DOMContentLoaded", () => {
     saveButton.classList.add("btn", "btn-danger", "table-save-btn");
     saveButton.style.margin = "10px";
 
-    // Add button below the table
+    // Add "Save Changes" button below the table
     table.parentNode.appendChild(saveButton);
 
     let updates = [];
 
-    // Track edits made in contenteditable spans
+    // Helper function for AJAX request
+    const saveEntry = (entryId, fieldLabel, updatedValue, successCallback) => {
+        const requestData = {
+            action: "update_gravity_form_entry",
+            security: ajax_object.security,
+            entry_id: entryId,
+            field_label: fieldLabel,
+            updated_value: updatedValue,
+        };
+
+        fetch(ajax_object.ajax_url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams(requestData).toString(),
+        })
+            .then((response) => response.json())
+            .then((result) => {
+                if (result.success) {
+                    console.log(`Entry (${entryId}, ${fieldLabel}) updated successfully.`);
+                    if (successCallback) successCallback(result);
+                } else {
+                    console.error("Failed to update entry:", result.message || "Unknown error");
+                    alert(`Error saving entry: ${result.message || "Unknown error"}`);
+                }
+            })
+            .catch((error) => {
+                console.error("AJAX error:", error);
+                alert("An error occurred while saving. Please try again.");
+            });
+    };
+
+    // Listener for handling in-place contenteditable updates (less-than-fifty)
     table.addEventListener("input", (event) => {
         const target = event.target;
 
         if (target.tagName === "SPAN" && target.hasAttribute("contenteditable")) {
-
             const isLessThanFifty = target.classList.contains("less-than-fifty");
-            // Get necessary data from the <span>
             const entryId = target.closest("tr").getAttribute("data-entry-id");
             const fieldLabel = target.getAttribute("data-field-label");
-            let updatedValue = target.textContent.trim();
+            const updatedValue = target.textContent.trim();
 
-            console.log("Entry ID:", entryId); // Debug: Check entry ID
-            console.log("Field Label:", fieldLabel); // Debug: Check field label
-            console.log("Updated Value:", updatedValue); // Debug: Check updated data
-
+            // For "less-than-fifty", enforce validation to stay under 50 characters
             if (isLessThanFifty && updatedValue.length > 50) {
                 alert("Value exceeds 50 characters! Changes won’t be saved.");
-                return; // Stop processing for this specific update
+                return;
             }
 
             if (entryId && fieldLabel) {
-                // Find if this edit exists in updates; if not, add it
                 const existingUpdate = updates.find(
                     (update) => update.entryId === entryId && update.fieldLabel === fieldLabel
                 );
@@ -46,41 +76,94 @@ document.addEventListener("DOMContentLoaded", () => {
                         entryId,
                         fieldLabel,
                         updatedValue,
-                        fieldType: isLessThanFifty ?
-                            "less-than-fifty" : "standard-textarea",
+                        fieldType: isLessThanFifty ? "less-than-fifty" : "standard-textarea",
                     });
                 }
             }
         }
     });
 
-    // Save all updates when Save button is clicked
-    saveButton.addEventListener("click", () => {
-        if (updates.length === 0) {
-            alert("No changes to save.");
+    // Listener for handling edit button clicks (more-than-fifty)
+    table.addEventListener("click", (event) => {
+        // Listener for "more-than-fifty" fields
+        if (event.target.classList.contains("edit-long-textarea-btn")) {
+            handleMoreThanFiftyEdit(event.target);
+        }
+
+        // Listener for "standardtext-more-than-fifty" fields
+        if (event.target.classList.contains("edit-long-textarea-btn-two")) {
+            handleStandardTextMoreThanFiftyEdit(event.target);
+        }
+    });
+
+// Function to handle editing for "more-than-fifty"
+    function handleMoreThanFiftyEdit(button) {
+        const entryId = button.getAttribute("data-entry-id");
+        const fieldLabel = button.getAttribute("data-field-label");
+        const fullContent = button.getAttribute("data-full-content");
+
+        if (!entryId || !fieldLabel || fullContent === null) {
+            console.error("Missing data for 'more-than-fifty' editing.");
+            alert("Unable to edit this field due to missing data.");
             return;
         }
 
-        // Use Ajax to save each change
-        updates.forEach((data) => {
-            // Differentiate less-than-fifty and standard-textarea
-            if (data.fieldType === "less-than-fifty" && data.updatedValue.length > 50) {
-                console.error(
-                    "Skipping save for less-than-fifty field. Value exceeds allowed limit:",
-                    data
-                );
-                return;
-            }
+        console.log("Editing more-than-fifty: ", { entryId, fieldLabel, fullContent });
 
-            const ajaxData = {
+        const cell = button.closest("td");
+
+        replaceCellWithTextarea(cell, entryId, fieldLabel, fullContent, "more-than-fifty");
+    }
+
+// Function to handle editing for "standardtext-more-than-fifty"
+    function handleStandardTextMoreThanFiftyEdit(button) {
+        const entryId = button.getAttribute("data-entry-id");
+        const fieldLabel = button.getAttribute("data-field-label");
+        const fullContent = button.getAttribute("data-full-content");
+
+        if (!entryId || !fieldLabel || fullContent === null) {
+            console.error("Missing data for 'standardtext-more-than-fifty' editing.");
+            alert("Unable to edit this field due to missing data.");
+            return;
+        }
+
+        console.log("Editing standardtext-more-than-fifty: ", { entryId, fieldLabel, fullContent });
+
+        const cell = button.closest("td");
+
+        replaceCellWithTextarea(cell, entryId, fieldLabel, fullContent, "standardtext-more-than-fifty");
+    }
+
+// Helper function to replace the table cell with a textarea
+    function replaceCellWithTextarea(cell, entryId, fieldLabel, fullContent, fieldType) {
+        const textarea = document.createElement("textarea");
+        textarea.value = fullContent; // Preload textarea with full content
+        textarea.classList.add("edit-textarea");
+
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "Save";
+        saveButton.classList.add("btn", "btn-success", "save-edit-btn");
+
+        const cancelButton = document.createElement("button");
+        cancelButton.textContent = "Cancel";
+        cancelButton.classList.add("btn", "btn-secondary", "cancel-edit-btn");
+
+        cell.innerHTML = ""; // Clear the cell
+        cell.appendChild(textarea);
+        cell.appendChild(saveButton);
+        cell.appendChild(cancelButton);
+
+        // Save Button Logic
+        saveButton.addEventListener("click", () => {
+            const updatedValue = textarea.value.trim();
+
+            const requestData = {
                 action: "update_gravity_form_entry",
                 security: ajax_object.security,
-                entry_id: data.entryId,
-                field_label: data.fieldLabel,
-                updated_value: data.updatedValue,
+                entry_id: entryId,
+                field_label: fieldLabel,
+                updated_value: updatedValue,
             };
-
-            console.log("Sending Ajax data:", ajaxData); // Debug: Check individual Ajax requests
 
             fetch(ajax_object.ajax_url, {
                 method: "POST",
@@ -88,22 +171,60 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: new URLSearchParams(ajaxData).toString(),
+                body: new URLSearchParams(requestData).toString(),
             })
                 .then((response) => response.json())
                 .then((result) => {
                     if (result.success) {
-                        console.log("Entry updated successfully for", data);
+                        console.log(`Entry updated successfully for ${fieldType}:`, result);
+
+                        const truncatedValue =
+                            updatedValue.length > 50 ? updatedValue.substring(0, 50) + "..." : updatedValue;
+
+                        cell.innerHTML = `
+                        <span class="${fieldType}" contenteditable="false" data-field-label="${fieldLabel}" data-full-content="${updatedValue}">
+                            ${truncatedValue}
+                        </span>
+                        <button class="${fieldType === 'more-than-fifty' ? 'edit-long-textarea-btn' : 'edit-long-textarea-btn-two'}" data-entry-id="${entryId}" data-field-label="${fieldLabel}" data-full-content="${updatedValue}">Edit</button>
+                    `;
                     } else {
-                        console.error("Error updating entry:", result.message, data);
+                        console.error("Error saving entry for", fieldType, result.message);
+                        alert(`Error saving entry: ${result.message}`);
                     }
                 })
-                .catch((error) => console.error("Error:", error));
+                .catch((error) => {
+                    console.error("AJAX error:", error);
+                    alert("An error occurred while saving. Please try again.");
+                });
         });
 
-        // Clear updates array after saving
+        // Cancel Button Logic
+        cancelButton.addEventListener("click", () => {
+            cell.innerHTML = `
+            <span class="${fieldType}" contenteditable="false" data-field-label="${fieldLabel}" data-full-content="${fullContent}">
+                ${fullContent}
+            </span>
+            <button class="${fieldType === 'more-than-fifty' ? 'edit-long-textarea-btn' : 'edit-long-textarea-btn-two'}" data-entry-id="${entryId}" data-field-label="${fieldLabel}" data-full-content="${fullContent}">Edit</button>
+        `;
+        });
+    }
+    // Save Changes button logic (global)
+    saveButton.addEventListener("click", () => {
+        if (updates.length === 0) {
+            alert("No changes to save.");
+            return;
+        }
+
+        updates.forEach((data) => {
+            const { entryId, fieldLabel, updatedValue } = data;
+            saveEntry(entryId, fieldLabel, updatedValue, () => {
+                console.log(`Change for entry ${entryId}, field ${fieldLabel}, saved successfully.`);
+            });
+        });
+
+        // Clear updates queue once changes are saved
         updates = [];
-        alert("Changes saved!");
+        alert("Changes saved successfully!");
     });
 });
 
