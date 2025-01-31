@@ -12,3 +12,15 @@
 
   width: 70%;
 }
+
+#gda-table {
+  &.table {
+    margin-bottom: 0;
+  }
+  thead {
+    position: sticky;
+    top: 0;
+    background-color: $smoke-white;
+    z-index: 100;
+  }
+}

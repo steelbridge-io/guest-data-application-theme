@@ -1,5 +1,6 @@
 #travel-form-posts {
-  margin-top: 8em !important;
+  padding-top: 8em !important;
+  background-color: $dark-white;
 }
 
 #travel-form-posts .destination-form {
@@ -37,17 +38,24 @@
   width: 20px;
 }
 
+#question-grid {
+  background-color: $white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 #question-grid.table-wrapper {
   display: flex;
   margin: 0 auto;
   overflow: auto;
   border-collapse: collapse;
+  background-color: $white;
 }
 
 #question-grid.table-wrapper .table-scrollable {
   overflow: auto;
-  max-height: 400px;
+  max-height: 800px;
   max-width: 100%;
+  background-color: $white;
 }
 
 #question-grid.table-wrapper table {
