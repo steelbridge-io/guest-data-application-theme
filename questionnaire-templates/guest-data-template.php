@@ -25,24 +25,34 @@ else :
   echo '<p>' . __('Sorry, no posts matched your criteria.') . '</p>';
 endif;
 
+$gda_waiver_url = get_post_meta($post->ID, '_gda_meta_key_waiver_url', true);
+
 // Search and filter section.
 echo '<div class="container gda-search-wrapper">
         <div class="row display-flex align-items-center">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" id="searchInput" placeholder="Search table..">
             </div>
-            <div class="col-md-4">
-                <div class="search-buttons">
+            <div class="col-md-3">
+                <div class="search-buttons d-flex justify-content-center">
                     <button class="btn btn-danger" id="prevMatch">Previous</button>
                     <button class="btn btn-danger" id="nextMatch">Next</button>
                     <span id="matchInfo"></span>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2 d-flex justify-content-center">
                 <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                     Filter Table
                 </button>
-            </div>
+            </div>';
+
+            if(!empty($gda_waiver_url)) :
+            echo '<div class="col-md-2 d-flex justify-content-center">
+                <a class="btn btn-danger" href="' . $gda_waiver_url . '" title="Find Waivers" target="_blank">Find Release Waivers</a>
+            </div> ';
+            endif;
+
+           echo '<div class="col-md-2 save-btn d-flex justify-content-center"></div>
         </div>
       </div>';
 
