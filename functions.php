@@ -6,6 +6,8 @@ function start_session() {
 }
 
 add_action('init', 'start_session', 1);
+
+
 // Theme setup
 function guest_data_application_theme_setup() {
   // Add default posts and comments RSS feed links to head.
@@ -29,6 +31,7 @@ require_once __DIR__ . '/inc/questionnaire-pages.php';
 require_once __DIR__ . '/inc/guest-data-app.php';
 require_once __DIR__ . '/inc/customizer.php';
 require_once __DIR__ . '/inc/front-page.php';
+require_once __DIR__ . '/inc/waiver-link.php';
 
 // Custom Travel Manager Nav
 function register_custom_menus() {
