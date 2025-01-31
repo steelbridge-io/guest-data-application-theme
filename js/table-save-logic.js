@@ -3,14 +3,28 @@
  * */
 document.addEventListener("DOMContentLoaded", () => {
     const table = document.querySelector("#gda-table");
-    const saveButton = document.createElement("button");
+    /* const saveButton = document.createElement("button");
     saveButton.textContent = "Save Changes";
     saveButton.setAttribute("type", "button");
     saveButton.classList.add("btn", "btn-danger", "table-save-btn");
     saveButton.style.margin = "10px";
 
     // Add "Save Changes" button below the table
-    table.parentNode.appendChild(saveButton);
+    table.parentNode.appendChild(saveButton); */
+
+
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "Save Changes";
+        saveButton.setAttribute("type", "button");
+        saveButton.classList.add("btn", "btn-danger", "table-save-btn");
+        saveButton.style.margin = "10px";
+
+        // Add "Save Changes" button inside the last col-md-3 within gda-search-wrapper
+        const colMd3 = document.querySelector(".gda-search-wrapper .row .col-md-2.save-btn");
+        colMd3.appendChild(saveButton);
+
+
+
 
     let updates = [];
 
