@@ -610,3 +610,65 @@ if (current_user_can('administrator')) { // Make sure it's only available to aut
 echo '<script>console.log("Generated Nonce: ' . wp_create_nonce('table_save_nonce') . '");</script>';
 }
 });*/
+
+
+
+/**
+ * Updates the title of a specific Gravity Forms field across all forms.
+ *
+ * This method checks all available Gravity Forms for a specific field ID (e.g., 39) and updates its label
+ * from the defined old title to the new title. If the label matches the old title, it will be replaced with
+ * the new title and the updated form is saved. The total count of updated forms is saved in an option
+ * to be retrieved later.
+ *
+ * @return void
+ */
+/* function update_gravity_forms_field_title() {
+
+ if (!class_exists('GFAPI')) {
+  return;
+ }
+
+ $forms = GFAPI::get_forms();
+ $updated_count = 0;
+
+ foreach ($forms as $form) {
+  $updated = false;
+
+  // Loop through fields looking for field ID 39 or any ID
+  foreach ($form['fields'] as &$field) {
+   if ($field->id == 39) {
+    $old_title = 'Please list any Special Requests, Needs, Dietary Restrictions, Health Concerns, Physical Challenges.';
+    $new_title = 'Please list any Special Requests, Needs, Health Concerns, Physical Challenges';
+
+    if ($field->label == $old_title) {
+     $field->label = $new_title;
+     $updated = true;
+    }
+   }
+  }
+
+  // If form was updated, save it
+  if ($updated) {
+   $result = GFAPI::update_form($form);
+   if (!is_wp_error($result)) {
+    $updated_count++;
+   }
+  }
+ }
+
+ // Store the result in an option to display later
+ update_option('gf_field_update_result', "Updated $updated_count forms");
+}
+
+add_action('admin_init', 'update_gravity_forms_field_title');
+
+// Display the result as an admin notice
+function display_update_result() {
+ $result = get_option('gf_field_update_result');
+ if ($result) {
+  echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($result) . '</p></div>';
+  delete_option('gf_field_update_result'); // Clean up
+ }
+}
+add_action('admin_notices', 'display_update_result'); */
