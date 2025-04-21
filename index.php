@@ -107,7 +107,20 @@ add_action('template_redirect', 'handle_login');
                             update_user_meta($user_id, 'requested_destination_15',
                             $requested_destination);
 
-                            // Display a confirmation message
+														 // Send notification email to the admin
+														 $to = 'argotti@theflyshop.com';
+														 $subject = 'New User Registration on The Fly Shop';
+														 $message = "A new user has registered on your website.\n\n";
+														 $message .= "Username: $username\n";
+														 $message .= "Name: $user_first $user_last\n";
+														 $message .= "Email: $email\n";
+														 $message .= "Requested Destination: $requested_destination\n";
+
+														 $headers = array('Content-Type: text/plain; charset=UTF-8');
+
+														 wp_mail($to, $subject, $message, $headers);
+
+														 // Display a confirmation message
                             echo '<p>Thank you for registering! Your registration request has been received and is being reviewed.</p>';
                             } else {
                             echo '<p>Error: ' . $user_id->get_error_message() . '</p>';
