@@ -550,24 +550,24 @@ HTML;
 		echo '<b>' . rgar($entry, '173') . '</b>';
 	}
 	echo  '</td>';
-	
-	echo  '<td>';
-	// Flight arrival date formating to m-d-Y
-	$dateOfFlightArr = rgar($entry, '169');
-	$flightArrDateTime = DateTime::createFromFormat('Y-m-d', $dateOfFlightArr);
-	
-	if ($flightArrDateTime) {
-		$formattedDateOfFlightArr = $flightArrDateTime->format('m-d-Y');
-	} else {
-		$formattedDateOfFlightArr = 'Invalid date format';
-	}
-	// Flight arrival date
-	if (rgar($entry, '169') != '') {
-		echo '<b>' . $formattedDateOfFlightArr . '</b>';
-	}
-	echo  '</td>';
-	
-	echo  '<td>';
+
+ echo '<td>';
+// Flight arrival date formatting to m-d-Y
+ $dateOfFlightArr = rgar($entry, '169');
+
+// Only process if the field is not empty
+ if (!empty($dateOfFlightArr)) {
+  $flightArrDateTime = DateTime::createFromFormat('Y-m-d', $dateOfFlightArr);
+
+  // Only display if it's a valid date
+  if ($flightArrDateTime) {
+   echo '<b>' . $flightArrDateTime->format('m-d-Y') . '</b>';
+  }
+  // If invalid format, display nothing
+ }
+ echo '</td>';
+
+ echo  '<td>';
 	// Arrival airline flight number
 	if (rgar($entry, '170') != '') {
 		echo '<b>' . rgar($entry, '170') . '</b>';

@@ -306,6 +306,27 @@ if ($form_id) {
       }
       }
 
+     if ($arrival_date_field) {
+      $field_id = $arrival_date_field['id'];
+      $arrival_date_value = rgar($entry, $field_id);
+
+      // Only process valid dates that aren't empty
+      if (!empty($arrival_date_value) && DateTime::createFromFormat('Y-m-d', $arrival_date_value)) {
+       $date = DateTime::createFromFormat('Y-m-d', $arrival_date_value);
+       if ($date) {
+        $arrival_date_value = $date->format('m/d/Y');
+       }
+      } else {
+       // Set to empty for empty fields
+       $arrival_date_value = '';
+      }
+
+      $row_values[$arrival_date_field['label']] = !empty($arrival_date_value) ? esc_html($arrival_date_value) : '&nbsp;';
+     }
+
+
+/*
+
       if ($arrival_date_field) {
         $field_id = $arrival_date_field['id'];
         $arrival_date_value = rgar($entry, $field_id);
@@ -315,6 +336,9 @@ if ($form_id) {
         }
         $row_values[$arrival_date_field['label']] = !empty($arrival_date_value) ? esc_html($arrival_date_value) : '&nbsp;';
       }
+*/
+
+
 
       if ($departure_date_field) {
         $field_id = $departure_date_field['id'];
@@ -359,14 +383,28 @@ if ($form_id) {
 
         // Handle specific field types
         switch ($field['type']) {
-          case 'date':
+         case 'date':
+          if (!empty($cell_value)) {
+           try {
+            $date = DateTime::createFromFormat('Y-m-d', $cell_value);
+            if ($date) {
+             $cell_value = $date->format('m/d/Y');
+            }
+           } catch (Exception $e) {
+            // Keep original value if parsing fails
+           }
+          } else {
+           $cell_value = '&nbsp;';
+          }
+          break;
+         /* case 'date':
             try {
               $date = new DateTime($cell_value);
               $cell_value = $date->format('m/d/Y');
             } catch (Exception $e) {
               $cell_value = !empty($cell_value) ? esc_html($cell_value) : '&nbsp;';
             }
-            break;
+            break; */
           case 'multiselect':
             $cell_value = !empty($cell_value) ? esc_html(implode(', ', $cell_value)) : '&nbsp;';
             break;
