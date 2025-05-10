@@ -196,6 +196,10 @@ if ($form_id) {
    );
    $entries = GFAPI::get_entries($form_id, $search_criteria, null, $paging);
 
+   // Add this line:
+   echo '<div class="container mt-3 mb-3"><div class="alert alert-info">Showing ' . count($entries) . ' entries</div></div>';
+
+
 
    // Function to sort entries manually based on Arrival date
     usort($entries, function ($a, $b) {
