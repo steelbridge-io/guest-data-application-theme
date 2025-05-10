@@ -25,6 +25,8 @@ else :
   echo '<p>' . __('Sorry, no posts matched your criteria.') . '</p>';
 endif;
 
+
+
 $gda_waiver_url = get_post_meta($post->ID, '_gda_meta_key_waiver_url', true);
 
 // Search and filter section.
@@ -184,10 +186,18 @@ if ($form_id) {
 
     echo '</tr></thead><tbody>';
 
-    // Fetch entries from Gravity Forms
-    $entries = GFAPI::get_entries($form_id, $search_criteria);
+    // Fetch entries from Gravity Forms (Commented out. See New GFAPI below.)
+    //$entries = GFAPI::get_entries($form_id, $search_criteria);
 
-    // Function to sort entries manually based on Arrival date
+   // New GFAPI that gets around pagination and renders up to 1000 entries in the Table Data.
+   $paging = array(
+    'offset'    => 0,     // Start at the first entry
+    'page_size' => 1000   // Get up to 1000 entries (adjust as needed)
+   );
+   $entries = GFAPI::get_entries($form_id, $search_criteria, null, $paging);
+
+
+   // Function to sort entries manually based on Arrival date
     usort($entries, function ($a, $b) {
       $date_a = DateTime::createFromFormat('Y-m-d', rgar($a, '46'));
       $date_b = DateTime::createFromFormat('Y-m-d', rgar($b, '46'));
