@@ -1,12 +1,18 @@
 <?php
-function start_session() {
-	if (session_status() === PHP_SESSION_NONE) {
-		session_start();
-	}
+
+
+// Start output buffering at the very beginning
+ob_start();
+
+// Move your session start inside a later hook
+function start_session()
+{
+ if (session_status() === PHP_SESSION_NONE) {
+  @session_start(); // Using @ to suppress any warnings
+ }
 }
 
 add_action('init', 'start_session', 1);
-
 
 // Theme setup
 function guest_data_application_theme_setup() {
