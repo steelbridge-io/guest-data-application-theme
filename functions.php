@@ -1,17 +1,12 @@
 <?php
-
-// Start output buffering at the very beginning
-ob_start();
-
-// Move your session start inside a later hook
-function start_session()
-{
- if (session_status() === PHP_SESSION_NONE) {
-  @session_start(); // Using @ to suppress any warnings
- }
+function start_session() {
+	if (session_status() === PHP_SESSION_NONE) {
+		session_start();
+	}
 }
 
 add_action('init', 'start_session', 1);
+
 
 // Theme setup
 function guest_data_application_theme_setup() {
@@ -37,6 +32,7 @@ require_once __DIR__ . '/inc/guest-data-app.php';
 require_once __DIR__ . '/inc/customizer.php';
 require_once __DIR__ . '/inc/front-page.php';
 require_once __DIR__ . '/inc/waiver-link.php';
+require_once __DIR__ . '/inc/table-ajax-logic.php';
 
 // Custom Travel Manager Nav
 function register_custom_menus() {
@@ -416,7 +412,7 @@ add_action('admin_notices', function() {
   }
 });
 
-/*** Testing ****/
+
 // Add the custom field to the user profile page
 function add_requested_destination_to_profile($user) {
  $value = get_user_meta($user->ID, 'requested_destination_15', true); // Fetch the saved value
@@ -468,7 +464,6 @@ add_action('wp_footer', 'add_toolbar_fallback_script');
 /**
 * Admin bypass for *required Gravity Form Fields
 */
-
 add_filter( 'gform_field_validation_FORMID', function( $result, $value, $form, $field ) {
 if ( current_user_can( 'administrator' ) ) {
 $result['208'] = true; // Skip validation for admins
@@ -486,108 +481,6 @@ $validation_result['is_valid'] = true;
 }
 return $validation_result;
 } );
-
-/******* REST API ******/
-
-add_action('wp_ajax_update_gravity_form_entry', 'update_gravity_form_entry');
-add_action('wp_ajax_nopriv_update_gravity_form_entry', 'update_gravity_form_entry');
-
-function update_gravity_form_entry() {
-// Debug nonce received from Postman
-error_log('Generated Nonce: ' . wp_create_nonce('table_save_nonce'));
-error_log('Received Nonce: ' . (isset($_POST['security']) ? $_POST['security'] : 'None provided'));
-error_log('Received nonce: ' . ($_POST['security'] ?? 'Not sent'));
-error_log('Expected nonce: ' . wp_create_nonce('table_save_nonce'));
-error_log(print_r($_POST, true)); // Logs all POST data sent by the AJAX request
-// Verify nonce for security
-if (!check_ajax_referer('table_save_nonce', 'security', false)) {
-wp_send_json_error(['message' => 'Invalid security token']);
-wp_die();
-}
-
-// Fetch and sanitize inputs
-global $entry_id;
-//$entry_id = isset($_POST['entry_id']) ? sanitize_text_field($_POST['entry_id']) : '';
-$entry_id = isset($_POST['entry_id']) ? intval($_POST['entry_id']) : 0;
-$field_label = isset($_POST['field_label']) ? sanitize_text_field($_POST['field_label']) : '';
-$updated_value = isset($_POST['updated_value']) ? sanitize_textarea_field($_POST['updated_value']) : '';
-
-// Debugging: Log inputs
-/*error_log("Entry ID Received: $entry_id");
-error_log("Field Label Received: $field_label");
-error_log("Updated Value Received: $updated_value");*/
-
-// Retrieve the entry
-$entry = GFAPI::get_entry($entry_id);
-if (is_wp_error($entry)) {
-//error_log("Error Retrieving Entry: " . $entry->get_error_message());
-wp_send_json_error(['message' => 'Entry not found: ' . $entry->get_error_message()]);
-wp_die();
-}
-
-// Debugging: Log the retrieved entry
-//error_log("Retrieved Entry: " . print_r($entry, true));
-
-// Retrieve the form and resolve the field ID
-$form_id = $entry['form_id'];
-$form = GFAPI::get_form($form_id);
-if (empty($form)) {
-//error_log("Form not found for Form ID: $form_id");
-wp_send_json_error(['message' => 'Form not found']);
-wp_die();
-}
-
-// Debugging: Log the retrieved form
-//error_log("Retrieved Form: " . print_r($form, true));
-
-// Find the field ID that matches the label
-$field_id = null;
-foreach ($form['fields'] as $field) {
-if (trim($field->label) === trim($field_label)) {
-$field_id = $field->id;
-break;
-}
-}
-
-if (!$field_id) {
-//error_log("Field Label '$field_label' Does Not Match Any Fields in the Form.");
-wp_send_json_error(['message' => 'Field could not be found for label: ' . $field_label]);
-wp_die();
-}
-
-// Debugging: Log the matched field ID
-//error_log("Matched Field ID: $field_id for Label: $field_label");
-
-// Check if the field exists in the entry object
-if (!array_key_exists($field_id, $entry)) {
-error_log("Field ID $field_id does not exist in the entry.");
-wp_send_json_error(['message' => "Field ID $field_id not available in entry."]);
-wp_die();
-}
-
-// Update the field in the entry
-$entry[$field_id] = $updated_value;
-
-// Debugging: Log entry before update
-//error_log("Entry Before Update: " . print_r($entry, true));
-
-// Update the entry and handle errors
-$result = GFAPI::update_entry($entry);
-if (is_wp_error($result)) {
-error_log("Error Updating Entry: " . $result->get_error_message());
-wp_send_json_error(['message' => 'Update failed: ' . $result->get_error_message()]);
-wp_die();
-}
-
-// Debugging: Log success
-//error_log("Entry Successfully Updated for ID: $entry_id. Updated Entry: " . print_r($entry, true));
-
-// Respond with success
-wp_send_json_success(['message' => 'Entry successfully updated.']);
-wp_die();
-}
-
-/*** /REST API **/
 
 /**
  * @return void
@@ -615,65 +508,3 @@ if (current_user_can('administrator')) { // Make sure it's only available to aut
 echo '<script>console.log("Generated Nonce: ' . wp_create_nonce('table_save_nonce') . '");</script>';
 }
 });*/
-
-
-
-/**
- * Updates the title of a specific Gravity Forms field across all forms.
- *
- * This method checks all available Gravity Forms for a specific field ID (e.g., 39) and updates its label
- * from the defined old title to the new title. If the label matches the old title, it will be replaced with
- * the new title and the updated form is saved. The total count of updated forms is saved in an option
- * to be retrieved later.
- *
- * @return void
- */
-/* function update_gravity_forms_field_title() {
-
- if (!class_exists('GFAPI')) {
-  return;
- }
-
- $forms = GFAPI::get_forms();
- $updated_count = 0;
-
- foreach ($forms as $form) {
-  $updated = false;
-
-  // Loop through fields looking for field ID 39 or any ID
-  foreach ($form['fields'] as &$field) {
-   if ($field->id == 39) {
-    $old_title = 'Please list any Special Requests, Needs, Dietary Restrictions, Health Concerns, Physical Challenges.';
-    $new_title = 'Please list any Special Requests, Needs, Health Concerns, Physical Challenges';
-
-    if ($field->label == $old_title) {
-     $field->label = $new_title;
-     $updated = true;
-    }
-   }
-  }
-
-  // If form was updated, save it
-  if ($updated) {
-   $result = GFAPI::update_form($form);
-   if (!is_wp_error($result)) {
-    $updated_count++;
-   }
-  }
- }
-
- // Store the result in an option to display later
- update_option('gf_field_update_result', "Updated $updated_count forms");
-}
-
-add_action('admin_init', 'update_gravity_forms_field_title');
-
-// Display the result as an admin notice
-function display_update_result() {
- $result = get_option('gf_field_update_result');
- if ($result) {
-  echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($result) . '</p></div>';
-  delete_option('gf_field_update_result'); // Clean up
- }
-}
-add_action('admin_notices', 'display_update_result'); */
