@@ -84,6 +84,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function reinitializePopovers() {
+        // Add a check to make sure bootstrap is loaded
+        if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+            // Dispose of existing popovers first
+            document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => {
+                const instance = bootstrap.Popover.getInstance(popoverTriggerEl);
+                if (instance) {
+                    instance.dispose();
+                }
+            });
+
+            // Reinitialize popovers
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            popoverTriggerList.forEach(popoverTriggerEl => {
+                new bootstrap.Popover(popoverTriggerEl, {
+                    trigger: 'focus',
+                    html: true,
+                    sanitize: false
+                });
+            });
+        } else {
+            console.warn('Bootstrap not fully loaded, cannot initialize popovers');
+        }
+    }
+
+    /**
+     * Per Claude the code !!above!! addresses the popover error in console. Delete the commented out code below when testing passes
+     */
+
+    /*function reinitializePopovers() {
         const bootstrap = window.bootstrap; // Ensure bootstrap object is referenced
         // Dispose of existing popovers
        document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => {
@@ -101,7 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 html: true,
             });
         });
-    }
+    }*/
+
+    /**
+     * Delete code commented code above when testing passes.
+     */
 
     searchInput.addEventListener('keyup', function () {
         currentIndex = 0;
@@ -138,4 +171,37 @@ window.addEventListener('load', (event) => {
             html: true
         });
     });
+});
+
+
+/**
+ * Fix for HTML display in table cells
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Find all table cells in the gda-table
+    const cells = document.querySelectorAll('#gda-table td');
+
+    cells.forEach(cell => {
+        // Get the current content
+        const content = cell.textContent.trim();
+
+        // Check if the content looks like HTML (starts with <span and contains contenteditable)
+        if (content.startsWith('<span') && content.includes('contenteditable')) {
+            // Replace the text content with actual HTML
+            cell.innerHTML = content;
+
+            // Find all the span elements we just created
+            const spans = cell.querySelectorAll('span[contenteditable]');
+
+            // Add input event listeners to any contenteditable spans
+            spans.forEach(span => {
+                // Make sure the span is properly set up for editing
+                if (span.getAttribute('contenteditable') === 'true') {
+                    console.log('Fixed editable field:', span.getAttribute('data-field-label'));
+                }
+            });
+        }
+    });
+
+    console.log('Table cell HTML fix applied');
 });
