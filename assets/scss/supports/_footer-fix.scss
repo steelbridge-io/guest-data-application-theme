@@ -1,0 +1,41 @@
+/* Fix for table and footer layout */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Make sure body takes at least full viewport height */
+}
+
+#travel-form-posts {
+  flex: 1; /* This will allow the content to expand */
+  z-index: 1; /* Ensure content is above footer */
+  position: relative; /* Required for z-index to work */
+  padding-bottom: 40px; /* Add space before footer */
+}
+
+#question-grid,
+.table-wrapper,
+.table-scrollable {
+  position: relative;
+  z-index: 2; /* Higher than footer */
+}
+
+/* Make sure the table isn't cut off */
+.table-scrollable {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Adjust footer to stay at bottom */
+footer,
+#colophon,
+.site-footer {
+  position: relative;
+  z-index: 0; /* Lower than main content */
+  width: 100%;
+  margin-top: auto; /* Push footer to bottom */
+}
+
+/* Make sure fixed columns in table remain visible */
+.fixed-column {
+  z-index: 10 !important; /* Higher z-index to stay above other elements */
+}
