@@ -8,6 +8,9 @@ function start_session() {
 add_action('init', 'start_session', 1);
 
 
+//include_once(get_template_directory() . '/debug-test.php');
+
+
 // Theme setup
 function guest_data_application_theme_setup() {
   // Add default posts and comments RSS feed links to head.
