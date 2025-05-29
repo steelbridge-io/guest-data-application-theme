@@ -216,6 +216,28 @@ function update_gravity_form_entry() {
    * Per Claude, code !!above!! added to save phone #'s
    */
 
+ } else if ($field_object->type === 'date' || $field_label === 'Trip Arrival Date' || $field_label === 'Trip Departure Date') {
+  error_log("Processing date field: $field_id with label: $field_label");
+
+  // Check if the date is in mm/dd/yyyy format
+  if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $updated_value)) {
+    // Convert from mm/dd/yyyy to Y-m-d format for database storage
+    $date = DateTime::createFromFormat('m/d/Y', $updated_value);
+    if ($date) {
+      $formatted_date = $date->format('Y-m-d');
+      $entry[$field_id] = $formatted_date;
+      error_log("Converted date from $updated_value to $formatted_date");
+    } else {
+      // If date parsing fails, log error and store original value
+      error_log("Failed to parse date: $updated_value");
+      $entry[$field_id] = $updated_value;
+    }
+  } else {
+    // If not in expected format, store as is
+    error_log("Date not in expected format: $updated_value");
+    $entry[$field_id] = $updated_value;
+  }
+
  } else {
   // For regular fields, just update the value directly
   error_log("Updating regular field: $field_id with value: $updated_value");
@@ -241,12 +263,3 @@ function update_gravity_form_entry() {
 
  wp_die();
 }
-
-
-
-
-
-
-
-
-

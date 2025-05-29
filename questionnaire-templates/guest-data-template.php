@@ -231,14 +231,33 @@ echo '<div class="container gda-search-wrapper">
        echo '<div class="container mt-3 mb-3"><div class="alert alert-info">Showing ' . count($entries) . ' entries</div></div>';
 
        // === DATA SORTING SECTION ===
-       // Sort entries by arrival date
+       // Sort entries by arrival date in chronological order (earliest to latest)
+       // This puts June dates before August dates (nearest to farthest out)
+       // Example: June 15, 2023 -> July 1, 2023 -> August 1, 2023
        usort($entries, function ($a, $b) {
-         $date_a = DateTime::createFromFormat('Y-m-d', rgar($a, '46'));
-         $date_b = DateTime::createFromFormat('Y-m-d', rgar($b, '46'));
+         // Get the arrival date values from entries
+         $date_value_a = rgar($a, '46');
+         $date_value_b = rgar($b, '46');
+
+         // Create DateTime objects if valid dates
+         $date_a = !empty($date_value_a) ? DateTime::createFromFormat('Y-m-d', $date_value_a) : false;
+         $date_b = !empty($date_value_b) ? DateTime::createFromFormat('Y-m-d', $date_value_b) : false;
+
+         // Handle cases where one or both dates might be invalid
          if ($date_a && $date_b) {
+           // Both dates are valid, compare them in ascending order (earliest first)
+           // This puts June dates before August dates (nearest to farthest)
            return $date_a <=> $date_b;
+         } elseif ($date_a) {
+           // Only date_a is valid, it should come before null dates
+           return -1;
+         } elseif ($date_b) {
+           // Only date_b is valid, it should come before null dates
+           return 1;
+         } else {
+           // Both dates are invalid, keep original order
+           return 0;
          }
-         return 0;
        });
 
        // === TABLE ROW GENERATION SECTION ===

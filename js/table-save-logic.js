@@ -417,16 +417,31 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Check if arrival date is being updated
+        const hasArrivalDateUpdate = updates.some(data => data.fieldLabel === "Trip Arrival Date");
+
+        let savedCount = 0;
+        const totalUpdates = updates.length;
+
         updates.forEach((data) => {
             const { entryId, fieldLabel, updatedValue } = data;
             saveEntry(entryId, fieldLabel, updatedValue, () => {
                 console.log(`Change for entry ${entryId}, field ${fieldLabel}, saved successfully.`);
+                savedCount++;
+
+                // If all updates are saved and arrival date was one of them, reload the page
+                if (savedCount === totalUpdates && hasArrivalDateUpdate) {
+                    alert("Arrival date updated. The page will reload to update the table order.");
+                    window.location.reload();
+                } else if (savedCount === totalUpdates) {
+                    // All updates saved but no arrival date changes
+                    alert("Changes saved successfully!");
+                }
             });
         });
 
         // Clear updates queue once changes are saved
         updates = [];
-        alert("Changes saved successfully!");
     });
 });
 
@@ -437,6 +452,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const fieldLabel = $(this).data('field-label');
         const updatedValue = $(this).text();
 
+        // Check if this is an arrival date field
+        const isArrivalDate = fieldLabel === "Trip Arrival Date";
+
         $.post(ajax_object.ajax_url, {
             action: "update_gravity_form_entry",
             security: ajax_object.security, // The nonce
@@ -446,6 +464,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }, function (response) {
             if (response.success) {
                 console.log("Entry updated successfully!", response.message);
+
+                // If this was an arrival date update, reload the page to update the table order
+                if (isArrivalDate) {
+                    alert("Arrival date updated. The page will reload to update the table order.");
+                    window.location.reload();
+                }
             } else {
                 console.error("Error updating entry:", response.message);
             }
