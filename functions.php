@@ -36,6 +36,7 @@ require_once __DIR__ . '/inc/customizer.php';
 require_once __DIR__ . '/inc/front-page.php';
 require_once __DIR__ . '/inc/waiver-link.php';
 require_once __DIR__ . '/inc/table-ajax-logic.php';
+require_once __DIR__ . '/inc/form-queueing-gravity-forms.php';
 
 // Custom Travel Manager Nav
 function register_custom_menus() {
