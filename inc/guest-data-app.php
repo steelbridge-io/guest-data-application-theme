@@ -149,7 +149,7 @@ function evaluation_form_tax() {
  );
 }
 
-// Register Custom Post Type Evaluation Data
+// Register Custom Post Type Evaluation Data (May add to seperate directory)
 function evaluation_data() {
 
  $labels = array(

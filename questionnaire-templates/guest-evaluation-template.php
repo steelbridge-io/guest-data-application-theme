@@ -8,7 +8,7 @@
  * Author: Chris Parsons
  * Author URL: https://steelbridge.io
  *
- * This template displays and manages guest data from Gravity Forms submissions.
+ * This template displays and manages guest evaluation from Gravity Forms submissions.
  * It provides search, filtering, and sorting capabilities for guest information.
  */
 
