@@ -124,14 +124,14 @@ echo '<div class="container gda-search-wrapper">
        // === FIELD CLASSIFICATION SECTION ===
        // Categorize fields by type for special handling
        $name_field = null;
-        $allergies_field = null;
-        $other_allergies_field = null;
-        $special_requests_field = null;
-        $reservation_number_field = null;
-        $arrival_date_field = ['label' => 'Trip Arrival Date', 'id' => 46, 'type' => 'date'];
-        $departure_date_field = ['label' => 'Trip Departure Date', 'id' => 47, 'type' => 'date'];
-        $address_fields = [];
-        $other_fields = [];
+			 $allergies_field = null;
+			 $other_allergies_field = null;
+			 $special_requests_field = null;
+			 $reservation_number_field = null;
+			 $arrival_date_field = ['label' => 'Trip Arrival Date', 'id' => 46, 'type' => 'date'];
+			 $departure_date_field = ['label' => 'Trip Departure Date', 'id' => 47, 'type' => 'date'];
+			 $address_fields = [];
+			 $other_fields = [];
 
        // Process each field and categorize by field label
        foreach ($fields as $field) {
