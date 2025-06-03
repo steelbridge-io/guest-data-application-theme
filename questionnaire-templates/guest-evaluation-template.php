@@ -129,7 +129,7 @@ echo '<div class="container gda-search-wrapper">
         $special_requests_field = null;
         $reservation_number_field = null;
         $arrival_date_field = ['label' => 'Trip Arrival Date', 'id' => 46, 'type' => 'date'];
-        $departure_date_field = ['label' => 'Trip Departure Date', 'id' => 47, 'type' => 'date'];
+        //$departure_date_field = ['label' => 'Trip Departure Date', 'id' => 47, 'type' => 'date'];
         $address_fields = [];
         $other_fields = [];
 
@@ -191,7 +191,7 @@ echo '<div class="container gda-search-wrapper">
        if ($other_allergies_field) $headers[] = $other_allergies_field['label'];
        if ($special_requests_field) $headers[] = $special_requests_field['label'];
        if ($arrival_date_field) $headers[] = $arrival_date_field['label'];
-       if ($departure_date_field) $headers[] = $departure_date_field['label'];
+       //if ($departure_date_field) $headers[] = $departure_date_field['label'];
        if ($reservation_number_field) $headers[] = $reservation_number_field['label'];
 
        // Add remaining fields to headers
@@ -377,7 +377,7 @@ echo '<div class="container gda-search-wrapper">
           }
 
           // Format departure date for display
-          if ($departure_date_field) {
+          /*if ($departure_date_field) {
            $field_id = $departure_date_field['id'];
            $departure_date_value = rgar($entry, $field_id);
            if (DateTime::createFromFormat('Y-m-d', $departure_date_value)) {
@@ -385,7 +385,7 @@ echo '<div class="container gda-search-wrapper">
              $departure_date_value = $date->format('m/d/Y');
            }
            $row_values[$departure_date_field['label']] = !empty($departure_date_value) ? esc_html($departure_date_value) : '&nbsp;';
-         }
+         }*/
 
          // === RESERVATION NUMBER PROCESSING ===
          if ($reservation_number_field) {
@@ -460,6 +460,7 @@ echo '<div class="container gda-search-wrapper">
           break;
           // Text area field with popover for long content
           case 'textarea':
+					$entry_id = $entry['id'];
           $excerpt = (strlen($cell_value) > 50) ? substr($cell_value, 0, 50) . '...' : $cell_value;
           $popover_link = '';
           if (strlen($cell_value) > 50) {
