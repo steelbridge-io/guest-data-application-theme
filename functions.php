@@ -171,59 +171,63 @@ function enqueue_gf_scripts_conditionally() {
 add_action('wp_enqueue_scripts', 'enqueue_gf_scripts_conditionally');
 
 // Enqueue scripts and styles for the frontend
-function guest_data_application_theme_scripts() {
+function guest_data_application_theme_scripts()
+{
 
-  wp_enqueue_style('guest-data-application-theme-style', get_stylesheet_uri());
+ wp_enqueue_style('guest-data-application-theme-style', get_stylesheet_uri());
 
-  // Enqueue and defer Bootstrap CSS
-  wp_enqueue_style('bootstrap5', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css', [], '5.2.2', 'all');
+ // Enqueue and defer Bootstrap CSS
+ wp_enqueue_style('bootstrap5', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css', [], '5.2.2', 'all');
 
-  // Enqueue and async/defer scripts
-  wp_enqueue_script('hero-template-jquery', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js', array(), '', true);
-  wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', array('jquery'), '5.2.1', true);
+ // Enqueue and async/defer scripts
+ wp_enqueue_script('hero-template-jquery', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js', array(), '', true);
+ wp_enqueue_script('hero-template-bootstrapjs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js', array('jquery'), '5.2.1', true);
 
-  // Custom script to handle logout without confirmation
-  wp_enqueue_script('custom-logout-script', get_template_directory_uri() . '/js/logout.js', ['jquery'], null, true);
+ // Custom script to handle logout without confirmation
+ wp_enqueue_script('custom-logout-script', get_template_directory_uri() . '/js/logout.js', ['jquery'], null, true);
 
-  wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', array('jquery', 'hero-template-bootstrapjs'), null, true);
-  wp_enqueue_script('nav-js', get_template_directory_uri() . '/js/nav.js', ['jquery'], null, true);
+ wp_enqueue_script('gda-popover-js', get_template_directory_uri() . '/js/gda-popover.js', array('jquery', 'hero-template-bootstrapjs'), null, true);
+ wp_enqueue_script('nav-js', get_template_directory_uri() . '/js/nav.js', ['jquery'], null, true);
 
-  if (is_page_template('questionnaire-templates/guest-data-template.php')) {
-  wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', array('jquery', 'hero-template-bootstrapjs'), null, true);
-  }
+ if (is_page_template('questionnaire-templates/guest-data-template.php')) {
+	wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/form-table.js', array('jquery', 'hero-template-bootstrapjs'), null, true);
+ }
 
-  if (is_front_page()) { // Check if we are on the front page (index.php)
+ if (is_page_template('questionnaire-templates/guest-evaluation-template.php')) {
+	wp_enqueue_script('form-table-js', get_template_directory_uri() . '/js/guest-data-table.js', array('jquery', 'hero-template-bootstrapjs'), null, true);
+ }
 
-    $recaptcha_site_key = defined('RECAPTCHA_SITE_KEY') ? RECAPTCHA_SITE_KEY : '';
+ if (is_front_page()) { // Check if we are on the front page (index.php)
 
-    if (!empty($recaptcha_site_key)) {
-      wp_enqueue_script(
-        'google-recaptcha',
-        "https://www.google.com/recaptcha/api.js?render={$recaptcha_site_key}",
-        array(),
-        null,
-        true
-      );
-    } else {
-      // Handle the case where RECAPTCHA_SITE_KEY is not defined
-      error_log('RECAPTCHA_SITE_KEY is not defined in wp-config.php');
-    }
+	$recaptcha_site_key = defined('RECAPTCHA_SITE_KEY') ? RECAPTCHA_SITE_KEY : '';
 
-    wp_enqueue_script('recaptcha-script', get_template_directory_uri() . '/js/captcha-front-page.js', ['jquery'], null, true);
+	if (!empty($recaptcha_site_key)) {
+	 wp_enqueue_script(
+		'google-recaptcha',
+		"https://www.google.com/recaptcha/api.js?render={$recaptcha_site_key}",
+		array(),
+		null,
+		true
+	 );
+	} else {
+	 // Handle the case where RECAPTCHA_SITE_KEY is not defined
+	 error_log('RECAPTCHA_SITE_KEY is not defined in wp-config.php');
+	}
 
-    // Localize script to pass site key
-    wp_localize_script('recaptcha-script', 'recaptchaConfig', array(
-      'siteKey' => $recaptcha_site_key
-    ));
-  }
+	wp_enqueue_script('recaptcha-script', get_template_directory_uri() . '/js/captcha-front-page.js', ['jquery'], null, true);
 
-wp_enqueue_script('table-save-logic', get_template_directory_uri() . '/js/table-save-logic.js', ['jquery'], null, true);
+	// Localize script to pass site key
+	wp_localize_script('recaptcha-script', 'recaptchaConfig', array(
+	 'siteKey' => $recaptcha_site_key
+	));
+ }
 
-wp_localize_script('table-save-logic', 'ajax_object', [
-'ajax_url' => admin_url('admin-ajax.php'),
-'security' => wp_create_nonce('table_save_nonce'),
-]);
+	wp_enqueue_script('table-save-logic', get_template_directory_uri() . '/js/table-save-logic.js', ['jquery'], null, true);
 
+	wp_localize_script('table-save-logic', 'ajax_object', [
+	 'ajax_url' => admin_url('admin-ajax.php'),
+	 'security' => wp_create_nonce('table_save_nonce'),
+	]);
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
 
