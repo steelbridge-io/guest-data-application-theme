@@ -213,7 +213,7 @@ function evaluation_data_tax() {
 	'evaluation-data',
 	array(
 	 'hierarchical'    => true,
-	 'label'           => __('Evaluation Data Category', 'travel_domain'),
+	 'label'           => __('Destination Evaluation', 'travel_domain'),
 	 'query_var'       => true,
 	 'rewrite'         => true,
 	 'show_in_rest'    => true,
