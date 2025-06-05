@@ -45,6 +45,7 @@ function register_custom_menus() {
     'travel-manager-menu' => __('Travel Manager Menu'),
     'public-menu' => __('Public Menu'),
     'destination-menu' => __('Destination Menu'),
+    'multi-destination-menu' => __('Multi-Destination Menu'),
     'tfs-staff-menu' => __('TFS Staff Menu'),
   ));
 }
