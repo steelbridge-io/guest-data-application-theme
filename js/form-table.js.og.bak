@@ -1,4 +1,5 @@
 
+
 document.addEventListener('DOMContentLoaded', () => {
     const tableWrapper = document.querySelector('.table-wrapper');
     const tableScrollable = document.querySelector('.table-scrollable');
@@ -47,7 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     parent.insertBefore(newNode, child.nextSibling);
                                     parent.insertBefore(after, newNode.nextSibling);
                                     child.data = data.slice(0, match.index);
-                                    matches.push(newNode);
+                                    matches.push(parent);
+
                                     matchCount++;
                                 }
                             } else if (!skipTags.includes(child.nodeName.toLowerCase())) {
@@ -76,47 +78,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function scrollToMatch(index) {
         if (matches.length > 0) {
-            const markElement = matches[index];
-
-            if (markElement) {
-                const cell = markElement.closest('td, th');
-
-                if (tableScrollable && cell) {
-                    const cellLeft = cell.offsetLeft;
-                    const cellTop = cell.offsetTop;
-                    const containerWidth = tableScrollable.clientWidth;
-                    const containerHeight = tableScrollable.clientHeight;
-
-                    const targetScrollLeft = cellLeft - (containerWidth / 2) + (cell.offsetWidth / 2);
-                    const targetScrollTop = cellTop - (containerHeight / 2) + (cell.offsetHeight / 2);
-
-                    const maxScrollLeft = tableScrollable.scrollWidth - containerWidth;
-                    const maxScrollTop = tableScrollable.scrollHeight - containerHeight;
-
-                    const finalScrollLeft = Math.max(0, Math.min(targetScrollLeft, maxScrollLeft));
-                    const finalScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
-
-                    tableScrollable.scrollTo({
-                        left: finalScrollLeft,
-                        top: finalScrollTop,
-                        behavior: 'smooth'
-                    });
-
-                    if (tableWrapper) {
-                        tableWrapper.scrollTo({
-                            top: finalScrollTop,
-                            behavior: 'smooth'
-                        });
-                    }
-                } else {
-                    markElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                }
-            }
+            const match = matches[index];
+            match.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
         }
     }
 
     function reinitializePopovers() {
+        // Add a check to make sure bootstrap is loaded
         if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+            // Dispose of existing popovers first
             document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => {
                 const instance = bootstrap.Popover.getInstance(popoverTriggerEl);
                 if (instance) {
@@ -124,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
+            // Reinitialize popovers
             const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
             popoverTriggerList.forEach(popoverTriggerEl => {
                 new bootstrap.Popover(popoverTriggerEl, {
@@ -137,7 +108,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Event listeners
+    /**
+     * Per Claude the code !!above!! addresses the popover error in console. Delete the commented out code below when testing passes
+     */
+
+    /*function reinitializePopovers() {
+        const bootstrap = window.bootstrap; // Ensure bootstrap object is referenced
+        // Dispose of existing popovers
+       document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverTriggerEl => {
+            const instance = bootstrap.Popover.getInstance(popoverTriggerEl);
+            if (instance) {
+                instance.dispose();
+            }
+        });
+
+        // Reinitialize popovers
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl, {
+                trigger: 'focus',
+                html: true,
+            });
+        });
+    }*/
+
+    /**
+     * Delete code commented code above when testing passes.
+     */
+
     searchInput.addEventListener('keyup', function () {
         currentIndex = 0;
         highlightMatches(searchInput.value.toLowerCase());
@@ -162,7 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
     reinitializePopovers();
 });
 
-// Bootstrap Popover initialization
+
+<!-- Initialize Bootstrap Popover -->
+
 window.addEventListener('load', (event) => {
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
@@ -173,18 +173,29 @@ window.addEventListener('load', (event) => {
     });
 });
 
-// Fix for HTML display in table cells
+
+/**
+ * Fix for HTML display in table cells
+ */
 document.addEventListener('DOMContentLoaded', function() {
+    // Find all table cells in the gda-table
     const cells = document.querySelectorAll('#gda-table td');
 
     cells.forEach(cell => {
+        // Get the current content
         const content = cell.textContent.trim();
 
+        // Check if the content looks like HTML (starts with <span and contains contenteditable)
         if (content.startsWith('<span') && content.includes('contenteditable')) {
+            // Replace the text content with actual HTML
             cell.innerHTML = content;
 
+            // Find all the span elements we just created
             const spans = cell.querySelectorAll('span[contenteditable]');
+
+            // Add input event listeners to any contenteditable spans
             spans.forEach(span => {
+                // Make sure the span is properly set up for editing
                 if (span.getAttribute('contenteditable') === 'true') {
                     console.log('Fixed editable field:', span.getAttribute('data-field-label'));
                 }
