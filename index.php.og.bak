@@ -211,9 +211,6 @@ add_action('template_redirect', 'handle_login');
                 </div>
             </div>
         </div>
-        <?php elseif (is_user_logged_in() && in_array('multi-destination', wp_get_current_user()->roles)): // Check if user is logged in and has the "subscriber" role
-         include get_template_directory() . '/multi-dest-user.php';
-         ?>
         <?php else: // If user is logged in ?>
         <h2 class="logged-in">You are currently logged in</h2>
         <?php endif; ?>
