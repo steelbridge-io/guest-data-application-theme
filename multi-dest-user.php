@@ -37,7 +37,7 @@ $user_id = $current_user->ID;
                    ?>
                       <a href="<?php echo esc_url($url); ?>"
                          class="btn btn-primary btn-lg px-4 py-3 destination-btn"
-                         target="_blank"
+                         target="_self"
                          style="min-width: 200px; max-width: 250px;">
                        <?php echo esc_html($button_text); ?>
                       </a>
@@ -75,9 +75,7 @@ $user_id = $current_user->ID;
 
         <div class="row justify-content-center mt-5">
             <div class="col-auto">
-                <a href="<?php echo wp_logout_url(home_url()); ?>" class="btn btn-outline-secondary btn-lg">
-                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                </a>
+                <a href="<?php echo wp_logout_url(home_url()); ?>" class="btn btn-outline-primary btn-lg">Logout</a>
             </div>
         </div>
     </div>
