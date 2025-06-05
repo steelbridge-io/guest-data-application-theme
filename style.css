@@ -167,7 +167,7 @@ body a {
 #site-navigation a {
   color: #fff;
   text-decoration: none;
-  font-size: 1em;
+  font-size: 1rem;
 }
 
 .menu-toggle {
@@ -195,6 +195,7 @@ body a {
 #site-navigation ul {
   display: flex;
   list-style: none;
+  align-items: center;
 }
 
 @media (min-width: 767.99px) {
@@ -329,6 +330,42 @@ body.home:after {
   background-color: transparent !important;
   position: relative;
   z-index: 99;
+}
+
+/* Multi-destination user styles */
+.multi-dest-nav-item {
+  padding-top: 1px;
+}
+
+#multi-dest-user-content .destination-btn {
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 0;
+}
+#multi-dest-user-content .destination-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+#multi-dest-user-content .destination-btn:active {
+  transform: translateY(0);
+}
+@media (max-width: 576px) {
+  #multi-dest-user-content .destination-btn {
+    min-width: 180px !important;
+    max-width: 100% !important;
+  }
+}
+#multi-dest-user-content .container h1 {
+  color: #2c3e50;
+  font-weight: 700;
+}
+#multi-dest-user-content .container h2 {
+  color: #34495e;
+  font-weight: 500;
 }
 
 #travel-form-posts {
