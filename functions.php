@@ -10,6 +10,47 @@ add_action('init', 'start_session', 1);
 
 //include_once(get_template_directory() . '/debug-test.php');
 
+function remove_dashboard_widgets() {
+    // Remove Activity widget
+    remove_meta_box('dashboard_activity', 'dashboard', 'normal');
+
+    // Remove WordPress Events and News widget
+    remove_meta_box('dashboard_primary', 'dashboard', 'side');
+
+    // Optional: Remove other default widgets
+    // remove_meta_box('dashboard_right_now', 'dashboard', 'normal');     // Right Now
+    // remove_meta_box('dashboard_recent_comments', 'dashboard', 'normal'); // Recent Comments
+    // remove_meta_box('dashboard_incoming_links', 'dashboard', 'normal');  // Incoming Links
+    // remove_meta_box('dashboard_plugins', 'dashboard', 'normal');         // Plugins
+    // remove_meta_box('dashboard_quick_press', 'dashboard', 'side');       // Quick Draft
+    // remove_meta_box('dashboard_recent_drafts', 'dashboard', 'side');     // Recent Drafts
+    // remove_meta_box('dashboard_secondary', 'dashboard', 'side');         // Other WordPress News
+}
+
+add_action('wp_dashboard_setup', 'remove_dashboard_widgets');
+
+
+// Remove admin toolbar for specific user roles
+function hide_admin_bar_for_specific_roles() {
+    $current_user = wp_get_current_user();
+
+    // Check if user has destination or multi-destination role
+    if (in_array('destination', $current_user->roles) || in_array('multi-destination', $current_user->roles)) {
+        show_admin_bar(false);
+    }
+}
+add_action('wp_loaded', 'hide_admin_bar_for_specific_roles');
+
+// Also prevent access to admin bar in admin area for these roles
+function remove_admin_bar_for_specific_roles() {
+    $current_user = wp_get_current_user();
+
+    if (in_array('destination', $current_user->roles) || in_array('multi-destination', $current_user->roles)) {
+        add_filter('show_admin_bar', '__return_false');
+    }
+}
+add_action('after_setup_theme', 'remove_admin_bar_for_specific_roles');
+
 
 // Theme setup
 function guest_data_application_theme_setup() {
