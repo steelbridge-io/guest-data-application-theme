@@ -41,6 +41,10 @@
 	        wp_nav_menu( array(
 		        'theme_location' => 'destination-menu'
 	        ) );
+        } else if ( in_array( 'multi-destination', (array) $user->roles ) ) {
+         wp_nav_menu( array(
+          'theme_location' => 'multi-destination-menu'
+         ) );
         } else if ( in_array( 'tfs_staff', (array) $user->roles ) ) {
 	        wp_nav_menu( array(
 		        'theme_location' => 'tfs-staff-menu'
