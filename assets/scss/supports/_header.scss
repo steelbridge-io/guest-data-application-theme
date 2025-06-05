@@ -51,7 +51,7 @@
 #site-navigation a {
   color: #fff;
   text-decoration: none;
-  font-size: 1em;
+  font-size: 1rem;
 }
 
 .menu-toggle {
@@ -79,6 +79,7 @@
 #site-navigation ul {
   display: flex;
   list-style: none;
+  align-items: center;
 }
 
 @media (min-width: 767.99px) {
