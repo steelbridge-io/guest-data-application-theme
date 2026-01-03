@@ -61,6 +61,11 @@ echo '<div class="container gda-search-wrapper">
 
            echo '<div class="col-md-2 save-btn d-flex justify-content-center"></div>
         </div>
+        <div class="container mt-2">
+            <div class="col-12">
+                <p class="rating-info text-muted text-align-center"><small>Rating scale is 1 though 5. 1 being poor, 5 being great.</small></p>
+            </div>
+        </div>
       </div>';
 
      // === COLLAPSIBLE FILTER SECTION ===

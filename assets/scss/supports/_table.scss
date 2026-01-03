@@ -1,4 +1,8 @@
 /** Table CSS */
+.prev-next-spacing {
+  position: relative;
+  top: 15px;
+}
 .save-edit-btn,
 .cancel-edit-btn {
   margin-top: -84px;
@@ -22,5 +26,13 @@
     top: 0;
     background-color: $smoke-white;
     z-index: 100;
+  }
+}
+
+@media (max-width: 767px) {
+  #table-controls {
+    .control-item {
+      margin: 10px;
+    }
   }
 }

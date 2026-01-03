@@ -4,7 +4,7 @@ Theme URI: http://example.com/guest-data-application-theme
 Author: Chris Parsons
 Author URI: http://parsonshosting.com
 Description: A basic theme for guest data application.
-Version: 1.0
+Version: 2.0
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: guest-data-application-theme
@@ -811,6 +811,11 @@ footer,
 }
 
 /** Table CSS */
+.prev-next-spacing {
+  position: relative;
+  top: 15px;
+}
+
 .save-edit-btn,
 .cancel-edit-btn {
   margin-top: -84px;
@@ -832,6 +837,12 @@ footer,
   top: 0;
   background-color: #f5f5f5;
   z-index: 100;
+}
+
+@media (max-width: 767px) {
+  #table-controls .control-item {
+    margin: 10px;
+  }
 }
 
 /*# sourceMappingURL=style.css.map */
