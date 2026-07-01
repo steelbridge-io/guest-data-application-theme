@@ -199,15 +199,14 @@ function update_gravity_form_entry() {
   $entry[$field_id] = $updated_value;
   error_log("Updated full name field: $field_id = $updated_value");
 
- } else if ($field_object->type === 'phone' || $field_type === 'phone' ||
-  strpos(strtolower($field_label), 'phone') !== false ||
-  strpos(strtolower($field_label), 'telephone') !== false) {
-
-
+ } else if ($field_object->type === 'phone' || $field_type === 'phone') {
+  // Only treat the field as a phone field when Gravity Forms itself
+  // reports it as type "phone" (or the client explicitly sends field_type=phone
+  // for a real phone field). We intentionally DO NOT rely on the field label
+  // containing the substring "phone", because labels like
+  // "Hotel In Reykjavik (Please include name of hotel and phone number)"
+  // are free-text fields that must preserve letters and punctuation.
   error_log("Processing phone field: $field_id");
-
-  // Format phone number if needed (optional)
-  // You could add phone number formatting here if required
 
   // For phone fields, we just update the value directly
   $entry[$field_id] = preg_replace('/[^0-9]/', '', $updated_value); // Keep only digits

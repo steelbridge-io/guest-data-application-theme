@@ -45,11 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const fieldLabel = target.getAttribute("data-field-label");
             const fieldType = target.getAttribute("data-field-type") || "";
 
-            // Extra check for phone fields based on the label or field type
-            const isActuallyPhoneField = fieldType === 'phone' ||
-                fieldLabel.toLowerCase().includes('phone') ||
-                fieldLabel.toLowerCase().includes('telephone') ||
-                isPhoneField;
+            // Only treat the field as a phone field when the rendered cell
+            // is explicitly marked as one (data-field-type="phone" or the
+            // phone-field-editable class). We intentionally do NOT use the
+            // field label text, because free-text fields whose labels mention
+            // "phone" (e.g. "Hotel In Reykjavik (... phone number)") must
+            // preserve letters and punctuation when saved.
+            const isActuallyPhoneField = fieldType === 'phone' || isPhoneField;
 
             if (isActuallyPhoneField) {
                 console.log("Phone field detected:", fieldLabel);
@@ -125,16 +127,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Get the field type, and specifically check for phone fields by label
         let fieldType = updateInfo ? updateInfo.fieldType : "";
 
-        // Extra check for phone fields based on the label
-        const isPhoneField = fieldType === 'phone' ||
-            fieldLabel.toLowerCase().includes('phone') ||
-            fieldLabel.toLowerCase().includes('telephone');
-
-        // Force field type to be 'phone' if it's a phone field
-        if (isPhoneField && fieldType !== 'phone') {
-            fieldType = 'phone';
-            console.log("Field type forced to 'phone' based on label:", fieldLabel);
-        }
+        // Only honor an explicit 'phone' field type coming from the cell's
+        // data-field-type attribute. Do NOT force 'phone' based on the field
+        // label containing the substring "phone" -- that incorrectly catches
+        // free-text fields like
+        // "Hotel In Reykjavik (Please include name of hotel and phone number)"
+        // and causes the server to strip everything except digits.
+        const isPhoneField = fieldType === 'phone';
 
         // Extra logging for phone fields
         if (isPhoneField) {
