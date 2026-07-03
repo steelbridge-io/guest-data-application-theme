@@ -32,9 +32,10 @@ endif;
 
 // Get waiver URL and filter variables
 $gda_waiver_url = get_post_meta($post->ID, '_gda_meta_key_waiver_url', true);
-$hide_past_dates = isset($_GET['hide_past_dates']) ? $_GET['hide_past_dates'] : '';
+$hide_past_dates = isset($_GET['hide_past_dates']) ? $_GET['hide_past_dates'] : '1';
 $filter_year = isset($_GET['filter_year']) ? sanitize_text_field($_GET['filter_year']) : '';
 $arrival_date = filter_input(INPUT_GET, 'filter_arrival_date', FILTER_SANITIZE_SPECIAL_CHARS);
+$controls_open = isset($_GET['controls_open']) ? $_GET['controls_open'] : '1';
 
 // === GRAVITY FORMS DATA RETRIEVAL SECTION ===
 // Get form ID from post meta
@@ -134,7 +135,7 @@ echo '<div class="container">
         </div>
     </div>';
 
-echo '<div id="table-controls" class="container gda-search-wrapper collapse show">
+echo '<div id="table-controls" class="container gda-search-wrapper collapse' . ($controls_open ? ' show' : '') . '">
         <div class="row g-2 align-items-center mb-3">
             <div class="col-md-4">
                 <div class="input-group" style="flex-wrap: nowrap;">
@@ -178,6 +179,13 @@ if(!empty($gda_waiver_url)) {
  //echo '<div class="col-md-2"></div>'; // Empty column for consistent layout
  '';
 }
+
+// Add CSV Export button
+echo '<div class="col-md-2 text-center">
+                <button class="btn btn-primary" id="exportCsvBtn" type="button" title="Export to CSV">
+                    <i class="bi bi-download me-1"></i>Export CSV
+                </button>
+            </div>';
 
 // CRITICAL: This is the exact element your JavaScript targets for the save button
 echo '<div class="col-md-2 save-btn d-flex justify-content-center"></div>
@@ -294,7 +302,7 @@ if ($form_id) {
   echo '<div class="container form-list-wrap"></div>';
   echo '<div id="question-grid" class="table-wrapper">
             <div class="table-scrollable">
-            <table id="gda-table" class="table">
+            <table id="gda-table" class="table" data-form-id="' . esc_attr($form_id) . '">
             <thead>
             <tr>';
 
@@ -359,6 +367,9 @@ if ($form_id) {
   // === TABLE HEADER GENERATION SECTION ===
   // Create headers array from categorized fields
   $headers = [];
+  
+  // Array to store modals for rendering after the table
+  $file_modals = [];
 
   // Add important fields first in a specific order
   if ($name_field) $headers[] = $name_field['label'];
@@ -628,6 +639,87 @@ if ($form_id) {
        'data-field-label="' . esc_attr($field_label) . '">' .
        $cell_value . '</span>';
       break;
+     case 'fileupload':
+      if (!empty($cell_value) && filter_var($cell_value, FILTER_VALIDATE_URL)) {
+       $file_url = esc_url($cell_value);
+       $file_name = basename(parse_url($file_url, PHP_URL_PATH));
+       $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+       $is_image = in_array($file_ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+       
+       if ($is_image) {
+        // Image file: show thumbnail with modal
+        $unique_id = 'file-' . $entry['id'] . '-' . $field_id;
+        
+        // Store modal HTML for rendering after table
+        $file_modals[] = '
+         <div class="modal fade" id="' . $unique_id . '" tabindex="-1" aria-labelledby="' . $unique_id . '-label" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+           <div class="modal-content">
+            <div class="modal-header">
+             <h5 class="modal-title" id="' . $unique_id . '-label">' . esc_html($file_name) . '</h5>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+             <img src="' . $file_url . '" class="img-fluid passport-modal-image" alt="' . esc_attr($file_name) . '">
+            </div>
+            <div class="modal-footer">
+             <a href="' . $file_url . '" download="' . esc_attr($file_name) . '" class="btn btn-primary"><i class="bi bi-download"></i> Download</a>
+             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+           </div>
+          </div>
+         </div>';
+        
+        // Cell value with thumbnail only
+        $cell_value = '
+         <div class="file-upload-preview">
+          <img src="' . $file_url . '" class="file-thumbnail" style="max-width: 60px; max-height: 60px; cursor: pointer; border: 1px solid #ddd; border-radius: 4px;" data-bs-toggle="modal" data-bs-target="#' . $unique_id . '" alt="' . esc_attr($file_name) . '">
+          <a href="' . $file_url . '" download="' . esc_attr($file_name) . '" class="btn btn-sm btn-primary ms-2" title="Download"><i class="bi bi-download"></i></a>
+         </div>';
+       } else {
+        // Non-image file (PDF, etc.)
+        $is_pdf = ($file_ext === 'pdf');
+        
+        if ($is_pdf) {
+         // PDF file: show icon with modal viewer
+         $unique_id = 'file-' . $entry['id'] . '-' . $field_id;
+         
+         // Store modal HTML for rendering after table
+         $file_modals[] = '
+          <div class="modal fade" id="' . $unique_id . '" tabindex="-1" aria-labelledby="' . $unique_id . '-label" aria-hidden="true">
+           <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+             <div class="modal-header">
+              <h5 class="modal-title" id="' . $unique_id . '-label">' . esc_html($file_name) . '</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+             </div>
+             <div class="modal-body" style="height: 70vh; padding: 0;">
+              <iframe src="' . $file_url . '" style="width: 100%; height: 100%; border: none;" title="' . esc_attr($file_name) . '"></iframe>
+             </div>
+             <div class="modal-footer">
+              <a href="' . $file_url . '" download="' . esc_attr($file_name) . '" class="btn btn-primary"><i class="bi bi-download"></i> Download</a>
+              <a href="' . $file_url . '" target="_blank" class="btn btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open in New Tab</a>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+             </div>
+            </div>
+           </div>
+          </div>';
+         
+         // Cell value with PDF icon
+         $cell_value = '
+          <div class="file-upload-preview">
+           <i class="bi bi-file-earmark-pdf" style="font-size: 40px; color: #dc3545; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#' . $unique_id . '" title="Click to view PDF"></i>
+           <a href="' . $file_url . '" download="' . esc_attr($file_name) . '" class="btn btn-sm btn-primary ms-2" title="Download"><i class="bi bi-download"></i></a>
+          </div>';
+        } else {
+         // Other file types: show file name with download link
+         $cell_value = '<a href="' . $file_url . '" download="' . esc_attr($file_name) . '" class="btn btn-sm btn-primary"><i class="bi bi-download"></i> ' . esc_html($file_name) . '</a>';
+        }
+       }
+      } else {
+       $cell_value = '&nbsp;';
+      }
+      break;
      default:
       if ($is_emergency_contact) {
        $cell_value = '<span class="name-field-editable" contenteditable="true" ' .
@@ -676,7 +768,8 @@ if ($form_id) {
      $cell_content = $row_values[$header] ?? $normalized_row_values[$normalized_header] ?? '&nbsp;';
 
      if (strpos($cell_content, 'contenteditable="true"') === false &&
-      strpos($cell_content, 'data-bs-toggle="popover"') === false) {
+      strpos($cell_content, 'data-bs-toggle="popover"') === false &&
+      strpos($cell_content, 'file-upload-preview') === false) {
       echo '<td><span class="no-popover" contenteditable="true" data-field-label="' . esc_attr($header) . '">' . $cell_content . '</span></td>';
      } else {
       echo '<td>' . $cell_content . '</td>';
@@ -688,6 +781,13 @@ if ($form_id) {
   }
 
   echo '</tbody></table></div></div>';
+  
+  // Render all file modals outside the table
+  if (!empty($file_modals)) {
+   foreach ($file_modals as $modal_html) {
+    echo $modal_html;
+   }
+  }
  } else {
   echo '<p>Form with ID ' . esc_html($form_id) . ' not found.</p>';
  }
@@ -736,7 +836,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (hidePastDatesCheckbox && hidePastDatesCheckbox.checked) {
             urlParams.set("hide_past_dates", "1");
         } else {
-            urlParams.delete("hide_past_dates");
+            urlParams.set("hide_past_dates", "0");
         }
         
         const yearValue = filterYearInput ? filterYearInput.value.trim() : "";
@@ -744,6 +844,14 @@ document.addEventListener("DOMContentLoaded", function() {
             urlParams.set("filter_year", yearValue);
         } else {
             urlParams.delete("filter_year");
+        }
+        
+        // Preserve table controls open state
+        const tableControls = document.getElementById("table-controls");
+        if (tableControls && tableControls.classList.contains("show")) {
+            urlParams.set("controls_open", "1");
+        } else {
+            urlParams.delete("controls_open");
         }
         
         const newUrl = window.location.pathname + "?" + urlParams.toString();
@@ -824,7 +932,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (hidePastDatesCheckbox && hidePastDatesCheckbox.checked) {
             urlParams.set("hide_past_dates", "1");
         } else {
-            urlParams.delete("hide_past_dates");
+            urlParams.set("hide_past_dates", "0");
         }
         
         const yearValue = filterYearInput ? filterYearInput.value.trim() : "";
@@ -834,10 +942,124 @@ document.addEventListener("DOMContentLoaded", function() {
             urlParams.delete("filter_year");
         }
         
+        // Preserve table controls open state
+        const tableControls = document.getElementById("table-controls");
+        if (tableControls && tableControls.classList.contains("show")) {
+            urlParams.set("controls_open", "1");
+        } else {
+            urlParams.delete("controls_open");
+        }
+        
         const newUrl = window.location.pathname + "?" + urlParams.toString();
         window.location.href = newUrl;
     }
 });
+</script>';
+
+// === MODAL BACKDROP FIX ===
+echo '<script>
+// Fix Bootstrap modal backdrop z-index issue
+(function() {
+    function initModalFix() {
+        console.log("Initializing modal backdrop fix...");
+        console.log("Bootstrap available:", typeof bootstrap !== "undefined");
+        
+        // Listen for all modal show events
+        document.addEventListener("show.bs.modal", function(event) {
+            const modal = event.target;
+            console.log("Modal opening:", modal.id);
+            
+            // Small delay to ensure backdrop is rendered
+            setTimeout(function() {
+                const backdrop = document.querySelector(".modal-backdrop");
+                const modalDialog = modal.querySelector(".modal-dialog");
+                const modalContent = modal.querySelector(".modal-content");
+                const modalBody = modal.querySelector(".modal-body");
+                const modalHeader = modal.querySelector(".modal-header");
+                const modalFooter = modal.querySelector(".modal-footer");
+                
+                console.log("Fixing modal z-index...");
+                console.log("Backdrop:", backdrop);
+                console.log("Modal:", modal);
+                
+                if (backdrop) {
+                    // Move backdrop before modal in DOM
+                    if (modal.parentNode && backdrop.parentNode !== modal.parentNode) {
+                        modal.parentNode.insertBefore(backdrop, modal);
+                        console.log("Moved backdrop before modal in DOM");
+                    }
+                    backdrop.style.zIndex = "1040";
+                    backdrop.style.position = "fixed";
+                    backdrop.style.top = "0";
+                    backdrop.style.left = "0";
+                    backdrop.style.width = "100vw";
+                    backdrop.style.height = "100vh";
+                    console.log("Backdrop z-index set to:", backdrop.style.zIndex);
+                }
+                
+                if (modal) {
+                    modal.style.zIndex = "1050";
+                    modal.style.position = "fixed";
+                    modal.style.top = "0";
+                    modal.style.left = "0";
+                    modal.style.width = "100%";
+                    modal.style.height = "100%";
+                    modal.style.overflow = "auto";
+                    console.log("Modal z-index set to:", modal.style.zIndex);
+                }
+                
+                if (modalDialog) {
+                    modalDialog.style.zIndex = "inherit";
+                    modalDialog.style.position = "relative";
+                    console.log("Modal Dialog z-index set to:", modalDialog.style.zIndex);
+                }
+                
+                if (modalContent) {
+                    modalContent.style.zIndex = "inherit";
+                    modalContent.style.position = "relative";
+                    modalContent.style.pointerEvents = "auto";
+                }
+                
+                if (modalHeader) {
+                    modalHeader.style.zIndex = "inherit";
+                    modalHeader.style.position = "relative";
+                    modalHeader.style.pointerEvents = "auto";
+                }
+                
+                if (modalBody) {
+                    modalBody.style.zIndex = "inherit";
+                    modalBody.style.position = "relative";
+                    modalBody.style.pointerEvents = "auto";
+                }
+                
+                if (modalFooter) {
+                    modalFooter.style.zIndex = "inherit";
+                    modalFooter.style.position = "relative";
+                    modalFooter.style.pointerEvents = "auto";
+                }
+            }, 50);
+        });
+        
+        console.log("Modal backdrop fix initialized successfully");
+    }
+    
+    // Wait for Bootstrap to load - check multiple times
+    function waitForBootstrap() {
+        if (typeof bootstrap !== "undefined") {
+            initModalFix();
+        } else {
+            console.log("Waiting for Bootstrap...");
+            setTimeout(waitForBootstrap, 100);
+        }
+    }
+    
+    // Start waiting after DOM is ready
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", waitForBootstrap);
+    } else {
+        waitForBootstrap();
+    }
+})();
 </script>';
 
 get_footer();
