@@ -78,6 +78,7 @@ require_once __DIR__ . '/inc/front-page.php';
 require_once __DIR__ . '/inc/waiver-link.php';
 require_once __DIR__ . '/inc/table-ajax-logic.php';
 require_once __DIR__ . '/inc/form-queueing-gravity-forms.php';
+require_once __DIR__ . '/inc/csv-export-handler.php';
 
 // Custom Travel Manager Nav
 function register_custom_menus() {
@@ -272,6 +273,20 @@ function guest_data_application_theme_scripts()
 	 'ajax_url' => admin_url('admin-ajax.php'),
 	 'security' => wp_create_nonce('table_save_nonce'),
 	]);
+
+	// Enqueue table column resize script - REMOVED (caused issues with wrapping/adjustment)
+	// wp_enqueue_script('table-column-resize', get_template_directory_uri() . '/js/table-column-resize.js', ['jquery'], null, true);
+
+	// Enqueue CSV export script for guest data templates
+	if (is_page_template('questionnaire-templates/guest-data-template.php') || 
+		is_page_template('questionnaire-templates/guest-evaluation-template.php')) {
+		wp_enqueue_script('csv-export-js', get_template_directory_uri() . '/js/csv-export.js', ['jquery'], null, true);
+		
+		wp_localize_script('csv-export-js', 'gda_csv_export', [
+			'ajax_url' => admin_url('admin-ajax.php'),
+			'nonce' => wp_create_nonce('csv_export_nonce'),
+		]);
+	}
 }
 add_action('wp_enqueue_scripts', 'guest_data_application_theme_scripts');
 
