@@ -3,4 +3,80 @@
 .table-save-btn {
   position: sticky;
   left: 0;
+  z-index: 50 !important; /* Higher than edit buttons to stay on top when scrolling */
+  background-color: inherit; /* Ensure background doesn't become transparent */
+}
+
+/* Vertically center table cell content */
+#gda-table td {
+  vertical-align: middle;
+  position: relative; /* Establish stacking context */
+}
+
+#gda-table th {
+  vertical-align: middle;
+}
+
+/* Sticky first column (Name) - solid background to prevent flicker */
+#gda-table td:first-child,
+#gda-table th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 50;
+  background-color: #ffffff; /* Solid white background */
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+#gda-table th:first-child {
+  z-index: 60; /* Header slightly higher */
+}
+
+/* Ensure edit buttons stay on top of neighboring cell content */
+#gda-table td.editing {
+  z-index: 10 !important;
+}
+
+#gda-table .table-edit-btn,
+#gda-table .btn-success,
+#gda-table .btn-danger {
+  position: relative;
+  z-index: 20 !important;
+}
+
+/** Passport Photo Modal Styles */
+
+/* Ensure modal backdrop is above everything */
+.modal-backdrop.show {
+  z-index: 100000 !important;
+  opacity: 0.5 !important;
+}
+
+/* Modal container */
+.modal.show {
+  z-index: 100001 !important;
+}
+
+/* Passport image modal specific styles */
+.passport-modal-image {
+  max-width: 100% !important;
+  max-height: 65vh !important;
+  height: auto !important;
+  width: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.modal-content {
+  background-color: #fff !important;
+}
+
+.modal-body {
+  padding: 1rem !important;
+  max-height: calc(100vh - 200px) !important;
+  overflow-y: auto !important;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6 !important;
+  padding: 1rem !important;
 }

@@ -37,5 +37,5 @@ footer,
 
 /* Make sure fixed columns in table remain visible */
 .fixed-column {
-  z-index: 10 !important; /* Higher z-index to stay above other elements */
+  z-index: 10; /* Higher z-index to stay above other elements */
 }
