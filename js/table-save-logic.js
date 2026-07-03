@@ -337,6 +337,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Helper function to replace the table cell with a textarea
     function replaceCellWithTextarea(cell, entryId, fieldLabel, fullContent, fieldType) {
+        // Add 'editing' class to the cell for z-index stacking
+        cell.classList.add("editing");
+        
         const textarea = document.createElement("textarea");
         textarea.value = fullContent; // Preload textarea with full content
         textarea.classList.add("edit-textarea");
@@ -357,6 +360,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Save Button Logic
         saveButton.addEventListener("click", () => {
             const updatedValue = textarea.value.trim();
+            
+            // Remove 'editing' class when saving
+            cell.classList.remove("editing");
 
             const requestData = {
                 action: "update_gravity_form_entry",
@@ -381,13 +387,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         const truncatedValue =
                             updatedValue.length > 50 ? updatedValue.substring(0, 50) + "..." : updatedValue;
+                        
+                        const needsPopover = updatedValue.length > 50;
+                        const popoverLink = needsPopover ? ` <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="${updatedValue.replace(/"/g, '&quot;')}">Read More</a>` : '';
 
                         cell.innerHTML = `
                         <span class="${fieldType}" contenteditable="false" data-field-label="${fieldLabel}" data-full-content="${updatedValue}">
                             ${truncatedValue}
-                        </span>
-                        <button class="${fieldType === 'more-than-fifty' ? 'edit-long-textarea-btn' : 'edit-long-textarea-btn-two'}" data-entry-id="${entryId}" data-field-label="${fieldLabel}" data-full-content="${updatedValue}">Edit</button>
+                        </span>${popoverLink}
+                        <button class="${fieldType === 'more-than-fifty' ? 'edit-long-textarea-btn' : 'edit-long-textarea-btn-two'} btn btn-danger table-edit-btn" data-entry-id="${entryId}" data-field-label="${fieldLabel}" data-full-content="${updatedValue}">Edit</button>
                     `;
+                    
+                    // Reinitialize popovers if Bootstrap is available
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+                        const popoverElement = cell.querySelector('[data-bs-toggle="popover"]');
+                        if (popoverElement) {
+                            new bootstrap.Popover(popoverElement);
+                        }
+                    }
                     } else {
                         console.error("Error saving entry for", fieldType, result.message);
                         alert(`Error saving entry: ${result.message}`);
@@ -401,12 +418,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Cancel Button Logic
         cancelButton.addEventListener("click", () => {
+            // Remove 'editing' class when canceling
+            cell.classList.remove("editing");
+            
+            const truncatedContent = fullContent.length > 50 ? fullContent.substring(0, 50) + "..." : fullContent;
+            const needsPopover = fullContent.length > 50;
+            const popoverLink = needsPopover ? ` <a tabindex="0" class="popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="${fullContent.replace(/"/g, '&quot;')}">Read More</a>` : '';
+            
             cell.innerHTML = `
             <span class="${fieldType}" contenteditable="false" data-field-label="${fieldLabel}" data-full-content="${fullContent}">
-                ${fullContent}
-            </span>
-            <button class="${fieldType === 'more-than-fifty' ? 'edit-long-textarea-btn' : 'edit-long-textarea-btn-two'}" data-entry-id="${entryId}" data-field-label="${fieldLabel}" data-full-content="${fullContent}">Edit</button>
+                ${truncatedContent}
+            </span>${popoverLink}
+            <button class="${fieldType === 'more-than-fifty' ? 'edit-long-textarea-btn' : 'edit-long-textarea-btn-two'} btn btn-danger table-edit-btn" data-entry-id="${entryId}" data-field-label="${fieldLabel}" data-full-content="${fullContent}">Edit</button>
         `;
+        
+        // Reinitialize popovers if Bootstrap is available
+        if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+            const popoverElement = cell.querySelector('[data-bs-toggle="popover"]');
+            if (popoverElement) {
+                new bootstrap.Popover(popoverElement);
+            }
+        }
         });
     }
     // Save Changes button logic (global)
