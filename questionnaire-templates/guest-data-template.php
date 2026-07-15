@@ -32,7 +32,8 @@ endif;
 
 // Get waiver URL and filter variables
 $gda_waiver_url = get_post_meta($post->ID, '_gda_meta_key_waiver_url', true);
-$hide_past_dates = isset($_GET['hide_past_dates']) ? $_GET['hide_past_dates'] : '1';
+$hide_past_dates = isset($_GET['hide_past_dates']) ? $_GET['hide_past_dates'] : '0';
+$hide_past_departures = isset($_GET['hide_past_departures']) ? $_GET['hide_past_departures'] : '0';
 $filter_year = isset($_GET['filter_year']) ? sanitize_text_field($_GET['filter_year']) : '';
 $arrival_date = filter_input(INPUT_GET, 'filter_arrival_date', FILTER_SANITIZE_SPECIAL_CHARS);
 $controls_open = isset($_GET['controls_open']) ? $_GET['controls_open'] : '1';
@@ -58,7 +59,7 @@ if (isset($_GET['filter_arrival_date']) && !empty($_GET['filter_arrival_date']))
  }
 }
 
-// Add filter for future dates only if hide past dates is checked
+// Add filter for future arrival dates only if hide past dates is checked
 if ($hide_past_dates) {
  try {
   $today = new DateTime();
@@ -70,6 +71,23 @@ if ($hide_past_dates) {
   ];
  } catch (Exception $e) {
   error_log('Error setting up future dates filter: ' . $e->getMessage());
+ }
+}
+
+// Add filter for future departure dates only if hide past departures is checked
+if ($hide_past_departures) {
+ try {
+  $today = new DateTime();
+  $today_formatted = $today->format('Y-m-d');
+  $search_criteria['field_filters'][] = [
+   'key' => '47',
+   'value' => $today_formatted,
+   'operator' => '>='
+  ];
+  // Debug log
+  error_log('Hide past departures filter applied. Today: ' . $today_formatted);
+ } catch (Exception $e) {
+  error_log('Error setting up future departure dates filter: ' . $e->getMessage());
  }
 }
 
@@ -120,7 +138,7 @@ echo '<div class="container">
         <div class="row mb-2">
             <div class="col-12 d-flex justify-content-between align-items-center bg-light p-2 rounded">
                 <h6 class="mb-0 text-muted">
-                    <i class="bi bi-gear-fill me-2"></i>Table Controls
+                    <i class="bi bi-gear-fill me-2"></i>Table Controls, Filters And Save Option
                 </h6>
                 <button class="btn btn-outline-secondary btn-sm" type="button" 
                         data-bs-toggle="collapse" 
@@ -228,10 +246,24 @@ echo '<div class="col-md-2 save-btn d-flex justify-content-center"></div>
                             <div class="filter-group">
                                 <label class="form-label fw-bold">Quick Options</label>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="hidePastDates" 
-                                           name="hide_past_dates" value="1" ' . ($hide_past_dates ? 'checked' : '') . '>
+                                    <input class="form-check-input" type="radio" id="showAll" 
+                                           name="date_filter" value="none" ' . (!$hide_past_dates && !$hide_past_departures ? 'checked' : '') . '>
+                                    <label class="form-check-label" for="showAll">
+                                        Show all dates
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" id="hidePastDates" 
+                                           name="date_filter" value="arrivals" ' . ($hide_past_dates ? 'checked' : '') . '>
                                     <label class="form-check-label" for="hidePastDates">
                                         Hide past arrival dates
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" id="hidePastDepartures" 
+                                           name="date_filter" value="departures" ' . ($hide_past_departures ? 'checked' : '') . '>
+                                    <label class="form-check-label" for="hidePastDepartures">
+                                        Hide past departure dates
                                     </label>
                                 </div>
                             </div>
@@ -271,7 +303,10 @@ echo '<div class="col-md-2 save-btn d-flex justify-content-center"></div>
 // Build filter status messages
 $filter_status_messages = [];
 if ($hide_past_dates) {
- $filter_status_messages[] = 'Hiding past dates';
+ $filter_status_messages[] = 'Hiding past arrival dates';
+}
+if ($hide_past_departures) {
+ $filter_status_messages[] = 'Hiding past departure dates';
 }
 if ($filter_year) {
  $filter_status_messages[] = 'Year: ' . esc_html($filter_year);
@@ -797,13 +832,27 @@ echo '</div>'; // End travel-form-posts div
 // === JAVASCRIPT FOR FILTER FUNCTIONALITY ===
 echo '<script>
 document.addEventListener("DOMContentLoaded", function() {
-    const hidePastDatesCheckbox = document.getElementById("hidePastDates");
+    const showAllRadio = document.getElementById("showAll");
+    const hidePastDatesRadio = document.getElementById("hidePastDates");
+    const hidePastDeparturesRadio = document.getElementById("hidePastDepartures");
     const filterYearInput = document.getElementById("filterYear");
     const applyYearFilterBtn = document.getElementById("applyYearFilter");
     const clearYearFilterBtn = document.getElementById("clearYearFilter");
     
-    if (hidePastDatesCheckbox) {
-        hidePastDatesCheckbox.addEventListener("change", function() {
+    if (showAllRadio) {
+        showAllRadio.addEventListener("change", function() {
+            updateURL();
+        });
+    }
+    
+    if (hidePastDatesRadio) {
+        hidePastDatesRadio.addEventListener("change", function() {
+            updateURL();
+        });
+    }
+    
+    if (hidePastDeparturesRadio) {
+        hidePastDeparturesRadio.addEventListener("change", function() {
             updateURL();
         });
     }
@@ -833,10 +882,15 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateURL() {
         const urlParams = new URLSearchParams(window.location.search);
         
-        if (hidePastDatesCheckbox && hidePastDatesCheckbox.checked) {
+        // Set both to 0 by default
+        urlParams.set("hide_past_dates", "0");
+        urlParams.set("hide_past_departures", "0");
+        
+        // Update based on selected radio button
+        if (hidePastDatesRadio && hidePastDatesRadio.checked) {
             urlParams.set("hide_past_dates", "1");
-        } else {
-            urlParams.set("hide_past_dates", "0");
+        } else if (hidePastDeparturesRadio && hidePastDeparturesRadio.checked) {
+            urlParams.set("hide_past_departures", "1");
         }
         
         const yearValue = filterYearInput ? filterYearInput.value.trim() : "";
@@ -898,8 +952,24 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     // Existing filter functionality (unchanged)
-    if (hidePastDatesCheckbox) {
-        hidePastDatesCheckbox.addEventListener("change", function() {
+    const showAllRadio2 = document.getElementById("showAll");
+    const hidePastDatesRadio2 = document.getElementById("hidePastDates");
+    const hidePastDeparturesRadio2 = document.getElementById("hidePastDepartures");
+    
+    if (showAllRadio2) {
+        showAllRadio2.addEventListener("change", function() {
+            updateURL();
+        });
+    }
+    
+    if (hidePastDatesRadio2) {
+        hidePastDatesRadio2.addEventListener("change", function() {
+            updateURL();
+        });
+    }
+    
+    if (hidePastDeparturesRadio2) {
+        hidePastDeparturesRadio2.addEventListener("change", function() {
             updateURL();
         });
     }
@@ -929,10 +999,15 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateURL() {
         const urlParams = new URLSearchParams(window.location.search);
         
-        if (hidePastDatesCheckbox && hidePastDatesCheckbox.checked) {
+        // Set both to 0 by default
+        urlParams.set("hide_past_dates", "0");
+        urlParams.set("hide_past_departures", "0");
+        
+        // Update based on selected radio button
+        if (hidePastDatesRadio2 && hidePastDatesRadio2.checked) {
             urlParams.set("hide_past_dates", "1");
-        } else {
-            urlParams.set("hide_past_dates", "0");
+        } else if (hidePastDeparturesRadio2 && hidePastDeparturesRadio2.checked) {
+            urlParams.set("hide_past_departures", "1");
         }
         
         const yearValue = filterYearInput ? filterYearInput.value.trim() : "";

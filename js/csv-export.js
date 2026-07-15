@@ -29,6 +29,7 @@
 
             // Get current filter values
             const hidePastDates = $('#hidePastDates').is(':checked') ? '1' : '0';
+            const hidePastDepartures = $('#hidePastDepartures').is(':checked') ? '1' : '0';
             const filterYear = $('#filterYear').val() || '';
             const filterArrivalDate = $('#filter_arrival_date').val() || '';
             const destinationTitle = $('h1').first().text() || 'Guest Data';
@@ -43,6 +44,7 @@
                 security: gda_csv_export.nonce,
                 form_id: formId,
                 hide_past_dates: hidePastDates,
+                hide_past_departures: hidePastDepartures,
                 filter_year: filterYear,
                 filter_arrival_date: filterArrivalDate,
                 destination_title: destinationTitle
